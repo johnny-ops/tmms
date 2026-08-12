@@ -150,7 +150,7 @@ export function DashboardPage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           {/* GOVSERVE Logo */}
           <img
-            src="/govserve-logo.png"
+            src="/logo.jpg"
             alt="GOVSERVE"
             style={{ width: 52, height: 52, objectFit: 'contain', borderRadius: 8, flexShrink: 0 }}
           />
