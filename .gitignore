@@ -25,6 +25,10 @@ build/
 
 # Video test files (too large for GitHub)
 tmms/apps/ai-service/test-videos/
+tmms/apps/web/src/assets/sample.mp4
+*.mp4
+*.avi
+*.mov
 
 # Logs
 *.log

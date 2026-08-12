@@ -1,0 +1,49 @@
+# Vercel Ignore - Files to exclude from deployment
+
+# Development files
+.vscode
+.git
+*.log
+
+# Database and backend
+tmms/packages/database/
+tmms/supabase/
+
+# AI Service (backend Python service)
+tmms/apps/ai-service/
+tmms/apps/api/
+
+# Test videos and large files
+tmms/apps/web/test-videos/
+*.mp4
+*.avi
+*.mov
+
+# Node modules (will be reinstalled)
+node_modules/
+**/node_modules/
+
+# Build artifacts
+dist/
+build/
+.vite/
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+
+# YOLO models
+*.pt
+*.onnx
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
