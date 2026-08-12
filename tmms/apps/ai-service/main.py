@@ -94,10 +94,19 @@ logger.info(f"✅ YOLO model loaded. Device: {YOLO_DEVICE}")
 # FastAPI App
 # ─────────────────────────────────────────────
 app = FastAPI(title="GOVCHECK AI Service", version="3.0.0")
+
+# CORS: allow_credentials=True is INCOMPATIBLE with allow_origins=["*"].
+# For a public AI service with no cookie/session auth, we drop credentials
+# and allow all origins. If you later need credentials, list explicit origins.
+_ALLOWED_ORIGINS = os.environ.get(
+    "ALLOWED_ORIGINS",
+    "https://tmms-three.vercel.app,http://localhost:5173,http://localhost:3000",
+).split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=_ALLOWED_ORIGINS,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
