@@ -50,7 +50,7 @@ export function useCCTVWebSocket(cameraId: string, backendUrl = 'ws://localhost:
   const [detections, setDetections] = useState<VehicleDetection[]>([]);
   const [violations, setViolations] = useState<ViolationEvent[]>([]);
   const ws = useRef<WebSocket | null>(null);
-  const reconnectTimeout = useRef<NodeJS.Timeout | null>(null);
+  const reconnectTimeout = useRef<number | null>(null);
 
   const connect = useCallback(() => {
     if (!cameraId) return;

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { BookOpen, Download, FileSpreadsheet, FilePdf, Calendar, Filter, BarChart3, AlertOctagon, Bus, ClipboardList, Search } from 'lucide-react';
+import { BookOpen, Download, FileSpreadsheet, FileText, Calendar, Filter, BarChart3, AlertOctagon, Bus, ClipboardList, Search } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 type ReportKey = 'violations' | 'vehicles' | 'franchises' | 'inspections';

@@ -7,6 +7,7 @@ interface AuthContextValue {
   user: UserProfile | null;
   session: Session | null;
   loading: boolean;
+  isDemoMode: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
   hasPermission: (requiredRoles: UserRole[]) => boolean;
@@ -91,7 +92,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signIn, signOut, hasPermission }}>
+    <AuthContext.Provider value={{ user, session, loading, isDemoMode: false, signIn, signOut, hasPermission }}>
       {children}
     </AuthContext.Provider>
   );

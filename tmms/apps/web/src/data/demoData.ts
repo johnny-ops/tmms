@@ -4,7 +4,7 @@
 import type {
   Vehicle, Operator, Driver, Franchise, Route, Terminal,
   TrafficTicket, ViolationType, Inspection, ParkingArea,
-  ParkingSlot, ParkingSession, AIDetection, AIViolationCandidate,
+  ParkingSlot, ParkingSlotStatus, ParkingSession, AIDetection, AIViolationCandidate,
   DashboardStats, Forecast, AppNotification, AuditLog, AIModel, UserProfile
 } from '@/types';
 
@@ -87,7 +87,7 @@ export const DEMO_PARKING_SLOTS: ParkingSlot[] = Array.from({ length: 40 }, (_, 
   id: `ps-${String(i + 1).padStart(3, '0')}`,
   parking_area_id: i < 20 ? 'pa-001' : 'pa-002',
   slot_number: `S-${String(i + 1).padStart(2, '0')}`,
-  slot_status: i < 14 ? 'OCCUPIED' : i < 16 ? 'RESERVED' : i === 17 ? 'OUT_OF_SERVICE' : 'AVAILABLE' as ParkingSlotStatus,
+  slot_status: (i < 14 ? 'OCCUPIED' : i < 16 ? 'RESERVED' : i === 17 ? 'OUT_OF_SERVICE' : 'AVAILABLE') as ParkingSlotStatus,
   created_at: '2023-01-01T00:00:00Z',
 }));
 
