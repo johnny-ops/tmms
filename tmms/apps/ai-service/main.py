@@ -1305,7 +1305,7 @@ async def ws_camera(websocket: WebSocket, camera_id: str):
 # ─────────────────────────────────────────────
 if __name__ == "__main__":
     import uvicorn
-    port = int(os.environ.get("AI_SERVICE_PORT", "8001"))
+    port = int(os.environ.get("PORT") or os.environ.get("AI_SERVICE_PORT", "8001"))
     logger.info(f"🚀 Starting GOVCHECK AI Service v3.0 on http://0.0.0.0:{port}")
     # IMPORTANT: Pass the `app` object directly (not "main:app" string).
     # Using a string causes uvicorn to spawn a subprocess on Windows which
