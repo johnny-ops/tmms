@@ -1,9 +1,8 @@
 {
-  "version": 2,
-  "buildCommand": "cd tmms/apps/web && npm install && npm run build",
-  "outputDirectory": "tmms/apps/web/dist",
-  "devCommand": "cd tmms/apps/web && npm run dev",
-  "installCommand": "cd tmms/apps/web && npm install",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
   "framework": "vite",
   "rewrites": [
     {
@@ -21,8 +20,5 @@
         }
       ]
     }
-  ],
-  "env": {
-    "NODE_VERSION": "20"
-  }
+  ]
 }
