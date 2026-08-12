@@ -8,7 +8,7 @@ import {
 import { formatDateTime, getStatusBadgeClass, formatStatus, confidenceLabel, confidenceColor } from '@/lib/utils';
 import { CreateTicketModal } from '@/pages/violations/ViolationsPage';
 
-const AI_BASE = 'http://localhost:8001';
+const AI_BASE = import.meta.env.VITE_AI_SERVICE_URL || 'http://localhost:8001';
 
 const VIOLATION_COLORS: Record<string, { bg: string; text: string; border: string }> = {
   BEAT_RED_LIGHT:  { bg: '#fef2f2', text: '#991b1b', border: '#fecaca' },
@@ -140,7 +140,7 @@ export function AIMonitorPage() {
       .catch(() => setAiOnline(false));
 
     // Check camera status and auto-start if offline
-    fetch('http://localhost:8001/api/cameras/CAM-001/status')
+    fetch(`${AI_BASE}/api/cameras/CAM-001/status`)
       .then(res => res.json())
       .then(async data => {
         if (data.running) {
@@ -148,7 +148,7 @@ export function AIMonitorPage() {
         } else {
           // Auto-start YOLO camera
           try {
-            await fetch('http://localhost:8001/api/cameras/CAM-001/start', { method: 'POST' });
+            await fetch(`${AI_BASE}/api/cameras/CAM-001/start`, { method: 'POST' });
             setCameraRunning(true);
           } catch (_) {}
         }
@@ -165,7 +165,7 @@ export function AIMonitorPage() {
 
     const connectWs = () => {
       if (isCleaning) return;
-      ws = new WebSocket('ws://localhost:8001/ws/camera/CAM-001');
+      ws = new WebSocket(`${AI_BASE.replace('http', 'ws')}/ws/camera/CAM-001`);
       ws.onopen = () => setWsConnected(true);
       ws.onerror = () => {}; // suppress console noise
       ws.onclose = () => {
@@ -202,7 +202,7 @@ export function AIMonitorPage() {
   const toggleCamera = async () => {
     const action = cameraRunning ? 'stop' : 'start';
     try {
-      await fetch(`http://localhost:8001/api/cameras/CAM-001/${action}`, { method: 'POST' });
+      await fetch(`${AI_BASE}/api/cameras/CAM-001/${action}`, { method: 'POST' });
       setCameraRunning(!cameraRunning);
     } catch (err) {
       alert('Failed to toggle camera.');
@@ -218,7 +218,7 @@ export function AIMonitorPage() {
       if (customStreamUrl.includes('rtsp')) stype = 'rtsp';
       if (customStreamUrl.includes('.mjpg')) stype = 'mjpeg';
       
-      const res = await fetch(`http://localhost:8001/api/cameras/test-stream`, {
+      const res = await fetch(`${AI_BASE}/api/cameras/test-stream`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ stream_type: stype, stream_url: customStreamUrl })
@@ -234,7 +234,7 @@ export function AIMonitorPage() {
   const handleApplyCustomStream = async () => {
     if (!testResult?.yolo_compatible) return;
     try {
-      await fetch(`http://localhost:8001/api/cameras/CAM-001/set-source`, {
+      await fetch(`${AI_BASE}/api/cameras/CAM-001/set-source`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ stream_type: testResult.stream_type, stream_url: customStreamUrl })
@@ -266,7 +266,7 @@ export function AIMonitorPage() {
         const b64 = canvas.toDataURL('image/jpeg', 0.8);
         
         try {
-          const res = await fetch('http://localhost:8001/api/cameras/webcam/frame', {
+          const res = await fetch(`${AI_BASE}/api/cameras/webcam/frame`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ frame_b64: b64 })
@@ -295,7 +295,7 @@ export function AIMonitorPage() {
 
   const loadConfig = async () => {
     try {
-      const res = await fetch(`http://localhost:8001/api/cameras/CAM-001/violation_config`);
+      const res = await fetch(`${AI_BASE}/api/cameras/CAM-001/violation_config`);
       const data = await res.json();
       setConfigLines(data.lines || []);
     } catch (e) {
@@ -305,7 +305,7 @@ export function AIMonitorPage() {
 
   const saveConfig = async () => {
     try {
-      await fetch(`http://localhost:8001/api/cameras/CAM-001/violation_config`, {
+      await fetch(`${AI_BASE}/api/cameras/CAM-001/violation_config`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ lines: configLines, zones: [] })
@@ -341,7 +341,7 @@ export function AIMonitorPage() {
     setSelectedSource(source);
     stopWebcam();
     if (cameraRunning && source !== 'cam1') {
-      await fetch(`http://localhost:8001/api/cameras/CAM-001/stop`, { method: 'POST' });
+      await fetch(`${AI_BASE}/api/cameras/CAM-001/stop`, { method: 'POST' });
       setCameraRunning(false);
     }
   };
@@ -778,7 +778,7 @@ export function AIMonitorPage() {
                   </>
                 ) : cameraRunning ? (
                   <img 
-                    src="http://localhost:8001/api/cameras/CAM-001/stream" 
+                    src={`${AI_BASE}/api/cameras/CAM-001/stream`} 
                     alt="Live AI Stream" 
                     style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                     onError={(e) => { (e.target as any).style.display = 'none'; }}

@@ -23,12 +23,13 @@ build/
 *.pt
 *.onnx
 
-# Video test files (too large for GitHub)
-tmms/apps/ai-service/test-videos/
-tmms/apps/web/src/assets/sample.mp4
+# Video files only (not folders)
 *.mp4
 *.avi
 *.mov
+
+# Keep test-videos folder structure but exclude videos
+tmms/apps/web/src/assets/sample.mp4
 
 # Logs
 *.log
