@@ -106,7 +106,7 @@ GOVSERVE/
 ### Step 1 — Clone the Repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/GOVSERVE.git
+git clone https://github.com/johnny-ops/GOVSERVE.git
 cd GOVSERVE
 ```
 
