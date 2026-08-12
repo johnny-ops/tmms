@@ -1,0 +1,50 @@
+# Python virtual environment
+tmms/apps/ai-service/venv/
+tmms/apps/ai-service/__pycache__/
+tmms/apps/ai-service/**/__pycache__/
+**/*.pyc
+**/*.pyo
+
+# Node modules
+node_modules/
+**/node_modules/
+
+# Build outputs
+dist/
+build/
+.vite/
+
+# Environment variables (SENSITIVE — do not commit!)
+.env
+.env.local
+.env.production
+
+# YOLO model weights (too large for GitHub)
+*.pt
+*.onnx
+
+# Video test files (too large for GitHub)
+tmms/apps/ai-service/test-videos/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE files
+.vscode/settings.json
+*.suo
+*.user
+
+# Supabase local
+supabase/.temp/
+supabase/migrations/.shadow/
+
+# Database files (keep locally, do not push to GitHub)
+tmms/packages/database/
+tmms/supabase/
