@@ -22,6 +22,8 @@ build/
 # YOLO model weights (too large for GitHub)
 *.pt
 *.onnx
+# Exception: Allow yolov8n.pt (6MB, needed for deployment)
+!tmms/apps/ai-service/yolov8n.pt
 
 # Video files only (not folders)
 *.mp4
