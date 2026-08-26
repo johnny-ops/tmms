@@ -10,7 +10,6 @@ interface ImportMeta {
   readonly env: ImportMetaEnv
 }
 
-// Node.js types for browser environment
 declare namespace NodeJS {
   interface Timeout extends Timer {}
   interface Timer {

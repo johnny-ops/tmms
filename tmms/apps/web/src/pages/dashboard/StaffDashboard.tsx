@@ -87,7 +87,7 @@ function AlertBanner({ icon, text, variant = 'warning' }: { icon: React.ReactNod
   );
 }
 
-export function DashboardPage() {
+export function StaffDashboard() {
   const navigate = useNavigate();
   const [lastUpdated, setLastUpdated] = useState(new Date());
 
@@ -116,21 +116,23 @@ export function DashboardPage() {
       return exp > now && exp <= in30Days;
     }).length,
     vehiclesDueForInspection: vehicles.filter(v => v.status === 'FOR_INSPECTION').length,
-    failedInspections: 0, // Need inspections table for this
+    failedInspections: 0, 
     pendingViolations: tickets.filter(t => t.status === 'ISSUED' || t.status === 'CONTESTED' || t.status === 'UNDER_REVIEW').length,
     todayViolations: tickets.filter(t => new Date(t.created_at).toDateString() === now.toDateString()).length,
     occupiedParkingSlots: parkingSlots.filter((s: any) => s.slot_status === 'OCCUPIED').length,
     availableParkingSlots: parkingSlots.filter((s: any) => s.slot_status === 'AVAILABLE').length,
-    activeTerminals: 2, // Hardcoded for now unless terminals table is fetched
+    activeTerminals: 2, 
     aiDetectionsToday: aiCandidates.filter((c: any) => new Date(c.created_at).toDateString() === now.toDateString()).length,
-    aiCandidatesPendingVerification: aiCandidates.filter((c: any) => c.verification_status === 'AI_SUGGESTED').length,
+    aiCandidatesPendingVerification: aiCandidates.filter((c: any) =>
+      c.verification_status === 'AI_SUGGESTED' || c.verification_status === 'PENDING_REVIEW'
+    ).length,
   };
 
   const parkingPct = (stats.occupiedParkingSlots + stats.availableParkingSlots) > 0
     ? Math.round((stats.occupiedParkingSlots / (stats.occupiedParkingSlots + stats.availableParkingSlots)) * 100)
     : 0;
 
-  // Build real monthly trend data from tickets
+  
   const monthlyViolations = (() => {
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const counts = new Array(12).fill(0);
@@ -145,10 +147,10 @@ export function DashboardPage() {
 
   return (
     <div>
-      {/* Header */}
+      {}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          {/* GOVSERVE Logo */}
+          {}
           <img
             src="/logo.jpg"
             alt="GOVSERVE"
@@ -174,7 +176,7 @@ export function DashboardPage() {
         </div>
       </div>
 
-      {/* Alert Banners */}
+      {}
       {(stats.franchisesExpiringSoon > 0 || stats.vehiclesDueForInspection > 0 || stats.aiCandidatesPendingVerification > 0) && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 24 }}>
           {stats.franchisesExpiringSoon > 0 && (
@@ -189,7 +191,7 @@ export function DashboardPage() {
         </div>
       )}
 
-      {/* Stats Grid */}
+      {}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 14, marginBottom: 24 }}>
         <StatCard icon={<Car size={18} />} label="Total Registered PUVs" value={stats.totalVehicles} color="#3a65ae" onClick={() => navigate('/puv')} />
         <StatCard icon={<CheckCircle size={18} />} label="Active PUVs" value={stats.activeVehicles} sub={`${stats.inactiveVehicles} inactive`} color="#22c55e" onClick={() => navigate('/puv')} />
@@ -201,13 +203,13 @@ export function DashboardPage() {
         <StatCard icon={<ParkingSquare size={18} />} label="Parking Utilization" value={`${parkingPct}%`} sub={`${stats.occupiedParkingSlots} occupied · ${stats.availableParkingSlots} free`} color="#3a65ae" onClick={() => navigate('/parking/slots')} />
         <StatCard icon={<Building2 size={18} />} label="Active Terminals" value={stats.activeTerminals} color="#22c55e" onClick={() => navigate('/terminals')} />
         <StatCard icon={<Camera size={18} />} label="AI Detections Today" value={stats.aiDetectionsToday} color="#7c3aed" onClick={() => navigate('/ai-monitor')} />
-        <StatCard icon={<Bell size={18} />} label="Pending AI Review" value={stats.aiCandidatesPendingVerification} color="#ef4444" alert={stats.aiCandidatesPendingVerification > 0} onClick={() => navigate('/ai-monitor')} />
+        <StatCard icon={<Bell size={18} />} label="Pending AI Review" value={stats.aiCandidatesPendingVerification} color="#ef4444" alert={stats.aiCandidatesPendingVerification > 0} onClick={() => navigate('/ai-review')} />
         <StatCard icon={<Activity size={18} />} label="Today's Violations" value={stats.todayViolations} color="#f59e0b" onClick={() => navigate('/tickets')} />
       </div>
 
-      {/* Charts + Recent Feed */}
+      {}
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 16 }}>
-        {/* Violations Trend */}
+        {}
         <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: 8, padding: '20px' }}>
           <div style={{ marginBottom: 16 }}>
             <h3 style={{ fontSize: '0.9rem', fontWeight: 600, color: '#1e293b' }}>Violations Trend</h3>
@@ -230,15 +232,15 @@ export function DashboardPage() {
           </ResponsiveContainer>
         </div>
 
-        {/* Recent AI Detections */}
+        {}
         <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: 8, overflow: 'hidden' }}>
           <div style={{ padding: '16px 20px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
               <h3 style={{ fontSize: '0.9rem', fontWeight: 600, color: '#1e293b' }}>AI Detection Feed</h3>
               <p style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Latest violation candidates</p>
             </div>
-            <button className="btn btn-ghost btn-sm" onClick={() => navigate('/ai-monitor')}>
-              View all <ArrowRight size={11} />
+            <button className="btn btn-ghost btn-sm" onClick={() => navigate('/ai-review')}>
+              View Review Queue <ArrowRight size={11} />
             </button>
           </div>
           <div style={{ padding: '8px 0' }}>
@@ -267,7 +269,53 @@ export function DashboardPage() {
         </div>
       </div>
 
-      {/* Recent PUV Table */}
+      {}
+      {stats.aiCandidatesPendingVerification > 0 && (
+        <div style={{ background: '#fef2f2', border: '2px solid #fecaca', borderRadius: 10, overflow: 'hidden', marginTop: 16 }}>
+          <div style={{ padding: '14px 20px', borderBottom: '1px solid #fecaca', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fff5f5' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Bell size={16} color="#dc2626" />
+              <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#991b1b' }}>
+                AI Detection Review Queue
+                <span style={{ marginLeft: 8, background: '#dc2626', color: 'white', fontSize: '0.7rem', padding: '2px 8px', borderRadius: 99, fontWeight: 700 }}>
+                  {stats.aiCandidatesPendingVerification} pending
+                </span>
+              </h3>
+            </div>
+            <button className="btn btn-primary btn-sm" onClick={() => navigate('/ai-review')} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <ArrowRight size={12} /> Open Review Page
+            </button>
+          </div>
+          <div style={{ padding: '8px 0' }}>
+            {aiCandidates
+              .filter((c: any) => c.verification_status === 'AI_SUGGESTED' || c.verification_status === 'PENDING_REVIEW')
+              .slice(0, 5)
+              .map((c: any) => (
+                <div key={c.id} style={{ padding: '10px 20px', borderBottom: '1px solid #fecaca', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#991b1b' }}>
+                      {c.vehicle_type && <span style={{ color: '#1d4ed8', marginRight: 6, fontSize: '0.75rem' }}>{c.vehicle_type}</span>}
+                      {c.rule_triggered}
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: '#b91c1c' }}>
+                      {c.location || 'Location not recorded'} · {new Date(c.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#dc2626', background: '#fee2e2', padding: '2px 8px', borderRadius: 4 }}>
+                      {(c.ai_confidence * 100).toFixed(0)}%
+                    </span>
+                    <button className="btn btn-primary btn-sm" onClick={() => navigate('/ai-review')} style={{ fontSize: '0.72rem' }}>
+                      Review
+                    </button>
+                  </div>
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
+
+      {}
       <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: 8, overflow: 'hidden', marginTop: 16 }}>
         <div style={{ padding: '16px 20px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h3 style={{ fontSize: '0.9rem', fontWeight: 600, color: '#1e293b' }}>Recent PUV Records</h3>

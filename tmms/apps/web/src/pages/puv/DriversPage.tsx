@@ -12,7 +12,7 @@ export function DriversPage() {
   const [page, setPage] = useState(1);
   const limit = 10;
   
-  // Modal state
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
@@ -66,8 +66,8 @@ export function DriversPage() {
     }
     setIsSubmitting(true);
     
-    // license_expiry must be a valid DATE, not an empty string
-    // operator_id must be a valid UUID or null (not empty string)
+    
+    
     const payload = {
       ...formData,
       license_expiry: formData.license_expiry || null,
@@ -140,7 +140,7 @@ export function DriversPage() {
         </div>
       </div>
 
-      {/* Stats */}
+      {}
       <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
         {[
           { label: 'Total Drivers', value: drivers.length, color: '#3a65ae' },

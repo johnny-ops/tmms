@@ -93,7 +93,7 @@ export function FranchisePage() {
   const [page, setPage] = useState(1);
   const limit = 10;
   
-  // Modals
+  
   const [reviewingId, setReviewingId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -259,7 +259,7 @@ export function FranchisePage() {
         </div>
       </div>
 
-      {/* Summary */}
+      {}
       <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
         {[
           { label: 'Total', value: franchises.length, color: '#3a65ae' },
@@ -278,7 +278,7 @@ export function FranchisePage() {
         ))}
       </div>
 
-      {/* Filters */}
+      {}
       <div style={{
         background: 'white', border: '1px solid #e2e8f0', borderRadius: 8,
         padding: '14px 16px', marginBottom: 16, display: 'flex', gap: 12, flexWrap: 'wrap'

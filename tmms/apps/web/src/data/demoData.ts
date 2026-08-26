@@ -1,5 +1,5 @@
-// Demo data for development — clearly marked as DEMO DATA
-// NEVER present these as real LGU records
+
+
 
 import type {
   Vehicle, Operator, Driver, Franchise, Route, Terminal,
@@ -140,7 +140,7 @@ export const DEMO_DASHBOARD_STATS: DashboardStats = {
   unreadNotifications: 3,
 };
 
-// Monthly violations for chart (demo)
+
 export const DEMO_MONTHLY_VIOLATIONS = [
   { month: 'Jan', count: 12 },
   { month: 'Feb', count: 18 },
@@ -152,14 +152,14 @@ export const DEMO_MONTHLY_VIOLATIONS = [
   { month: 'Aug', count: 9 },
 ];
 
-// Route demand data (demo)
+
 export const DEMO_ROUTE_DEMAND = [
   { route: 'R-01', trips: 145, passengers: 2350 },
   { route: 'R-02', trips: 98, passengers: 1640 },
   { route: 'R-03', trips: 56, passengers: 2100 },
 ];
 
-// Parking utilization by hour (demo)
+
 export const DEMO_PARKING_HOURLY = [
   { hour: '6AM', utilized: 15 },
   { hour: '7AM', utilized: 28 },

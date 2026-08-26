@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Users, Plus, Search, Eye, Edit, Shield } from 'lucide-react';
+import { Users, Plus, Search, Eye, Edit, Shield, Trash2 } from 'lucide-react';
 import { roleLabel, getStatusBadgeClass, formatDate } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
 
@@ -23,6 +23,23 @@ export function UsersPage() {
     }
     load();
   }, []);
+
+  async function handleDeleteUser(id: string, name: string) {
+    if (!window.confirm(`Are you sure you want to delete the user account for ${name}?`)) return;
+    
+    // Optimistic UI update
+    const previousUsers = [...users];
+    setUsers(users.filter(u => u.id !== id));
+    
+    try {
+      const { error } = await supabase.from('profiles').delete().eq('id', id);
+      if (error) throw error;
+    } catch (err: any) {
+      console.error('Failed to delete user:', err);
+      alert(`Failed to delete user: ${err.message}`);
+      setUsers(previousUsers); // revert on failure
+    }
+  }
 
   const filtered = users.filter(u =>
     !search || (u.full_name || '').toLowerCase().includes(search.toLowerCase()) ||
@@ -98,7 +115,9 @@ export function UsersPage() {
                   <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
                     <button className="btn btn-ghost btn-sm"><Eye size={13} /></button>
                     <button className="btn btn-ghost btn-sm"><Edit size={13} /></button>
-                    <button className="btn btn-ghost btn-sm"><Shield size={13} /></button>
+                    <button className="btn btn-ghost btn-sm" style={{ color: '#dc2626' }} onClick={() => handleDeleteUser(u.id, u.full_name)}>
+                      <Trash2 size={13} />
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -109,3 +128,4 @@ export function UsersPage() {
     </div>
   );
 }
+

@@ -1,12 +1,12 @@
-import { useState, useEffect, useRef } from 'react';
-import { supabase } from '@/lib/supabase';
-import { useTable } from '@/hooks/useSupabase';
+import { useNavigate } from 'react-router-dom';
 import { 
   Camera, CheckCircle, XCircle, Eye, AlertTriangle, Clock, 
-  Cpu, Play, Square, Activity, Video, Upload, FileVideo, X
+  Cpu, Play, Square, Activity, Video, Upload, FileVideo, X, ArrowRight, Bell, ShieldAlert, List, Car, Maximize2, Hash, FolderOpen, Check
 } from 'lucide-react';
 import { formatDateTime, getStatusBadgeClass, formatStatus, confidenceLabel, confidenceColor } from '@/lib/utils';
-import { CreateTicketModal } from '@/pages/violations/ViolationsPage';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { supabase } from '@/lib/supabase';
+import { useTable } from '@/hooks/useSupabase';
 
 const AI_BASE = import.meta.env.VITE_AI_SERVICE_URL || 'http://localhost:8001';
 
@@ -44,10 +44,10 @@ function ConfidenceMeter({ value }: { value: number }) {
 }
 
 function CandidateCard({
-  candidate, onVerify, onReject
+  candidate, onSendToReview, onReject
 }: {
   candidate: any;
-  onVerify: () => void;
+  onSendToReview: () => void;
   onReject: () => void;
 }) {
   return (
@@ -57,15 +57,16 @@ function CandidateCard({
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
         <div>
-          <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e293b', marginBottom: 4 }}>
+          <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e293b', marginBottom: 2 }}>
+            {candidate.vehicle_type && <span style={{ color: '#3b82f6', fontSize: '0.78rem', fontWeight: 600, marginRight: 6 }}>{candidate.vehicle_type}</span>}
             {candidate.rule_triggered}
           </div>
           <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
-            📍 {candidate.location ?? 'Location not recorded'}
+            {candidate.location ?? 'Location pending staff review'}
           </div>
         </div>
         <span className="badge badge-pending" style={{ flexShrink: 0 }}>
-          Awaiting Verification
+          Awaiting Review
         </span>
       </div>
 
@@ -75,7 +76,7 @@ function CandidateCard({
         <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
           <AlertTriangle size={12} color="#d97706" />
           <span style={{ fontSize: '0.72rem', color: '#92400e', fontWeight: 600 }}>
-            AI-Suggested — Requires authorized personnel verification before ticket issuance
+            AI-Suggested — Staff must review, search PUV database, and confirm before any violation is issued
           </span>
         </div>
       </div>
@@ -86,12 +87,118 @@ function CandidateCard({
             <Eye size={12} /> Evidence
           </a>
         )}
-        <button className="btn btn-danger btn-sm" onClick={onReject}><XCircle size={12} /> Reject</button>
-        <button className="btn btn-primary btn-sm" onClick={onVerify}><CheckCircle size={12} /> Verify & Ticket</button>
+        <button className="btn btn-danger btn-sm" onClick={onReject}><XCircle size={12} /> Dismiss</button>
+        <button className="btn btn-primary btn-sm" onClick={onSendToReview} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <ArrowRight size={12} /> Send to Review
+        </button>
       </div>
 
       <div style={{ marginTop: 8, fontSize: '0.7rem', color: '#94a3b8', textAlign: 'right' }}>
         {formatDateTime(candidate.created_at)}
+      </div>
+    </div>
+  );
+}
+
+function LiveViolationAlert({
+  violationAlert,
+  onDismiss,
+  onSendToReview,
+}: {
+  violationAlert: any;
+  onDismiss: () => void;
+  onSendToReview: () => void;
+}) {
+  const colors: Record<string, { bg: string; border: string; badge: string; badgeText: string }> = {
+    BEAT_RED_LIGHT:  { bg: '#fff1f2', border: '#fca5a5', badge: '#dc2626', badgeText: 'BEAT RED LIGHT' },
+    SWERVING:        { bg: '#fff7ed', border: '#fcd34d', badge: '#d97706', badgeText: 'SWERVING' },
+    ILLEGAL_PARKING: { bg: '#fffbeb', border: '#fde68a', badge: '#92400e', badgeText: 'ILLEGAL PARKING' },
+    OBSTRUCTION:     { bg: '#f0fdf4', border: '#86efac', badge: '#166534', badgeText: 'OBSTRUCTION' },
+    OVERSPEEDING:    { bg: '#fdf4ff', border: '#d8b4fe', badge: '#7e22ce', badgeText: 'OVERSPEEDING' },
+  };
+  const rule = violationAlert.rule_triggered || 'UNKNOWN';
+  const theme = colors[rule] || { bg: '#f8fafc', border: '#cbd5e1', badge: '#475569', badgeText: rule };
+
+  return (
+    <div style={{
+      background: theme.bg,
+      border: `2px solid ${theme.border}`,
+      borderRadius: 12,
+      overflow: 'hidden',
+      boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+      width: 360,
+      animation: 'slideInRight 0.35s cubic-bezier(0.34,1.56,0.64,1)',
+    }}>
+      <div style={{ alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid #fecaca' }}>
+        <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#dc2626', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <AlertTriangle size={24} color="#dc2626" /> VIOLATION DETECTED
+        </h2>
+        <button onClick={onDismiss} style={{
+          background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: 4,
+          color: 'white', cursor: 'pointer', padding: '2px 6px', fontSize: '0.75rem',
+        }}>
+          <X size={16} />
+        </button>
+      </div>
+
+      {violationAlert.evidence_frame && (
+        <div style={{ background: '#000', position: 'relative' }}>
+          <img
+            src={violationAlert.evidence_frame}
+            alt="Evidence"
+            style={{ width: '100%', maxHeight: 180, objectFit: 'contain', display: 'block' }}
+          />
+          <div style={{
+            position: 'absolute', bottom: 6, left: 6,
+            background: theme.badge,
+            color: 'white', fontSize: '0.7rem', fontWeight: 700,
+            padding: '3px 8px', borderRadius: 4,
+          }}>{theme.badgeText}</div>
+        </div>
+      )}
+
+      <div style={{ padding: '12px 14px' }}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginBottom: 8 }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#0f172a', marginBottom: 2 }}>
+              {violationAlert.vehicle_type && <span style={{ color: '#3b82f6', marginRight: 6, fontSize: '0.78rem' }}>{violationAlert.vehicle_type}</span>}
+              {rule}
+            </div>
+            <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
+              {violationAlert.location || 'Location pending staff review'}
+              {violationAlert.violation_reason && <> · <em>{violationAlert.violation_reason}</em></>}
+            </div>
+          </div>
+          <div style={{
+            background: 'white', border: `1px solid ${theme.border}`,
+            borderRadius: 8, padding: '4px 8px', textAlign: 'center', flexShrink: 0
+          }}>
+            <div style={{ fontSize: '1rem', fontWeight: 800, color: theme.badge }}>
+              {Math.round((violationAlert.ai_confidence || 0) * 100)}%
+            </div>
+            <div style={{ fontSize: '0.6rem', color: '#94a3b8' }}>confidence</div>
+          </div>
+        </div>
+
+        {violationAlert.plate_number && violationAlert.plate_number !== 'UNKNOWN' && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.85rem' }}>
+            <Hash size={14} color="#64748b" /> Plate: <code style={{ fontWeight: 700, color: '#0f172a' }}>{violationAlert.plate_number}</code>
+          </div>
+        )}
+
+        <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
+          <button onClick={onDismiss} style={{
+            flex: 1, padding: '6px 0', background: '#f1f5f9', border: '1px solid #e2e8f0',
+            borderRadius: 6, fontSize: '0.78rem', color: '#64748b', cursor: 'pointer', fontWeight: 600,
+          }}>Dismiss</button>
+          <button onClick={onSendToReview} style={{
+            flex: 2, padding: '6px 0', background: theme.badge,
+            border: 'none', borderRadius: 6, fontSize: '0.78rem', color: 'white', cursor: 'pointer',
+            fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
+          }}>
+            <ArrowRight size={12} /> Send to Review
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -103,12 +210,12 @@ export function AIMonitorPage() {
   const [isRealtimeConnected, setIsRealtimeConnected] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState<any | null>(null);
 
-  // Live Stream State
+  
   const [liveStats, setLiveStats] = useState<any>(null);
   const [wsConnected, setWsConnected] = useState(false);
   const [cameraRunning, setCameraRunning] = useState(false);
 
-  // Upload State
+  
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
@@ -118,8 +225,8 @@ export function AIMonitorPage() {
   const [aiOnline, setAiOnline] = useState<boolean | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // New Features State
-  const [selectedSource, setSelectedSource] = useState<'cam1' | 'webcam' | 'custom'>('cam1');
+  
+  const [selectedSource, setSelectedSource] = useState<'cam1' | 'webcam' | 'custom' | 'server'>('server');
   const [customStreamUrl, setCustomStreamUrl] = useState('');
   const [testResult, setTestResult] = useState<any>(null);
   const [isTesting, setIsTesting] = useState(false);
@@ -127,30 +234,73 @@ export function AIMonitorPage() {
   const [webcamInterval, setWebcamInterval] = useState<any>(null);
   const [webcamDetections, setWebcamDetections] = useState<any[]>([]);
 
+  
+  const [serverVideos, setServerVideos] = useState<any[]>([]);
+  const [selectedServerVideo, setSelectedServerVideo] = useState<string>('');
+  const [applyingVideo, setApplyingVideo] = useState(false);
+  const [activeVideoName, setActiveVideoName] = useState<string>('training.mp4');
+
   const [isConfiguringRules, setIsConfiguringRules] = useState(false);
   const [configLines, setConfigLines] = useState<any[]>([]);
   const [dragNode, setDragNode] = useState<{ lineIdx: number, pointIdx: 1 | 2 } | null>(null);
 
   const { data: violationTypes } = useTable('violation_types');
 
+  
+  const [liveAlerts, setLiveAlerts] = useState<any[]>([]);
+  const alertDismissTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+
+  const dismissAlert = useCallback((id: string) => {
+    const timer = alertDismissTimers.current.get(id);
+    if (timer) { clearTimeout(timer); alertDismissTimers.current.delete(id); }
+    setLiveAlerts(prev => prev.filter(a => a._alertId !== id));
+  }, []);
+
+  const handleSendAlertToReview = useCallback(async (violationAlert: any) => {
+    dismissAlert(violationAlert._alertId);
+    
+    try {
+      await supabase.from('ai_violation_candidates').insert({
+        camera_id: violationAlert.camera_id || 'CAM-001',
+        plate_number: violationAlert.plate_number || 'UNKNOWN',
+        vehicle_type: violationAlert.vehicle_type || null,
+        rule_triggered: violationAlert.rule_triggered || 'Unknown',
+        location: violationAlert.location || 'Live Stream',
+        ai_confidence: violationAlert.ai_confidence || 0.5,
+        verification_status: 'PENDING_REVIEW',
+        violation_reason: violationAlert.violation_reason || null,
+      });
+    } catch (e) { console.error('Failed to queue alert:', e); }
+    window.alert('Sent to Staff Review Queue!');
+  }, [dismissAlert]);
+
   useEffect(() => {
-    // Check AI health on mount
+    
     fetch(`${AI_BASE}/health`)
       .then(r => r.ok ? setAiOnline(true) : setAiOnline(false))
       .catch(() => setAiOnline(false));
 
-    // Check camera status and auto-start if offline
+    
+    fetch(`${AI_BASE}/api/videos`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.videos && data.videos.length > 0) {
+          setServerVideos(data.videos);
+          
+          const training = data.videos.find((v: any) => v.filename === 'training.mp4');
+          const first = training || data.videos[0];
+          setSelectedServerVideo(first.path);
+          setActiveVideoName(first.filename);
+        }
+      })
+      .catch(() => {});
+
+    
     fetch(`${AI_BASE}/api/cameras/CAM-001/status`)
       .then(res => res.json())
       .then(async data => {
         if (data.running) {
           setCameraRunning(true);
-        } else {
-          // Auto-start YOLO camera
-          try {
-            await fetch(`${AI_BASE}/api/cameras/CAM-001/start`, { method: 'POST' });
-            setCameraRunning(true);
-          } catch (_) {}
         }
       })
       .catch(() => setCameraRunning(false));
@@ -167,18 +317,35 @@ export function AIMonitorPage() {
       if (isCleaning) return;
       ws = new WebSocket(`${AI_BASE.replace('http', 'ws')}/ws/camera/CAM-001`);
       ws.onopen = () => setWsConnected(true);
-      ws.onerror = () => {}; // suppress console noise
+      ws.onerror = () => {}; 
       ws.onclose = () => {
         setWsConnected(false);
         if (!isCleaning) {
-          // Reconnect after 3s
+          
           retryTimeout = setTimeout(connectWs, 3000);
         }
       };
       ws.onmessage = (e) => {
         try {
           const data = JSON.parse(e.data);
-          if (data.type === 'statistics') setLiveStats(data);
+          if (data.type === 'statistics') {
+            setLiveStats(data);
+            
+            if (data.violations && data.violations.length > 0) {
+              data.violations.forEach(async (v: any) => {
+                if (v.ai_confidence >= 0.50) {
+                } else {
+                  
+                  const alertId = `${v.rule_triggered}_${v.track_id}_${Date.now()}`;
+                  const alert = { ...v, _alertId: alertId };
+                  setLiveAlerts(prev => [...prev.slice(-4), alert]); 
+                  
+                  const timer = setTimeout(() => dismissAlert(alertId), 15000);
+                  alertDismissTimers.current.set(alertId, timer);
+                }
+              });
+            }
+          }
         } catch (err) {}
       };
     };
@@ -188,7 +355,7 @@ export function AIMonitorPage() {
       isCleaning = true;
       if (retryTimeout) clearTimeout(retryTimeout);
       if (ws) {
-        ws.onclose = null; // prevent retry on intentional close
+        ws.onclose = null; 
         if (ws.readyState === WebSocket.CONNECTING) {
           ws.onopen = () => ws!.close();
         } else if (ws.readyState === WebSocket.OPEN) {
@@ -207,6 +374,33 @@ export function AIMonitorPage() {
     } catch (err) {
       alert('Failed to toggle camera.');
     }
+  };
+
+  const applyServerVideo = async () => {
+    if (!selectedServerVideo) return;
+    setApplyingVideo(true);
+    try {
+      
+      if (cameraRunning) {
+        await fetch(`${AI_BASE}/api/cameras/CAM-001/stop`, { method: 'POST' });
+        setCameraRunning(false);
+      }
+      
+      await fetch(`${AI_BASE}/api/cameras/CAM-001/set-source`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ stream_type: 'file', stream_url: selectedServerVideo }),
+      });
+      
+      const vid = serverVideos.find(v => v.path === selectedServerVideo);
+      if (vid) setActiveVideoName(vid.filename);
+      
+      await fetch(`${AI_BASE}/api/cameras/CAM-001/start`, { method: 'POST' });
+      setCameraRunning(true);
+    } catch (err) {
+      alert('Failed to apply video source.');
+    }
+    setApplyingVideo(false);
   };
 
   const handleTestStream = async () => {
@@ -252,7 +446,7 @@ export function AIMonitorPage() {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       webcamRef.current.srcObject = stream;
       
-      // Start push frame loop (approx 10 FPS)
+      
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       
@@ -347,7 +541,7 @@ export function AIMonitorPage() {
   };
 
   useEffect(() => {
-    // 1. Initial Fetch
+    
     const fetchCandidates = async () => {
       try {
         const { data, error } = await supabase
@@ -363,7 +557,7 @@ export function AIMonitorPage() {
     };
     fetchCandidates();
 
-    // 2. Realtime Subscription
+    
     let channel: any;
     try {
       channel = supabase
@@ -388,8 +582,15 @@ export function AIMonitorPage() {
     };
   }, []);
 
-  function handleVerify(candidate: any) {
-    setSelectedCandidate(candidate);
+  async function handleSendToReview(candidate: any) {
+    
+    await supabase
+      .from('ai_violation_candidates')
+      .update({ verification_status: 'PENDING_REVIEW' })
+      .eq('id', candidate.id);
+    setCandidates(prev => prev.map(c => c.id === candidate.id ? { ...c, verification_status: 'PENDING_REVIEW' } : c));
+    
+    alert('Detection sent to Staff Review Queue. Staff can now review, search PUV database, and confirm the violation.');
   }
 
   async function handleReject(id: string) {
@@ -401,7 +602,7 @@ export function AIMonitorPage() {
     }
   }
 
-  // Upload Tab Handlers
+  
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -463,33 +664,22 @@ export function AIMonitorPage() {
   };
 
   const handleIssueUploadTicket = async (violation: any) => {
-    const vt = violationTypes?.find((v: any) =>
-      v.name.toLowerCase().includes((violation.rule_triggered || '').toLowerCase()) ||
-      (violation.rule_triggered || '').toLowerCase().includes(v.name.toLowerCase())
-    );
-
-    const ticketNumber = `TKT-${Date.now().toString().slice(-6)}`;
-    const now = new Date();
-
+    
     try {
-      const { error: err } = await supabase.from('traffic_tickets').insert({
-        ticket_number: ticketNumber,
+      const { error: err } = await supabase.from('ai_violation_candidates').insert({
+        camera_id: 'VIDEO_UPLOAD',
         plate_number: violation.plate_number || 'UNKNOWN',
-        violation_type_id: vt?.id || null,
-        location: violation.location || 'Video Analysis',
-        incident_date: now.toISOString().split('T')[0],
-        incident_time: now.toTimeString().slice(0, 5),
-        penalty_amount: vt?.penalty_amount || 0,
-        status: 'ISSUED',
-        payment_status: 'UNPAID',
-        evidence_url: violation.evidence_image_url || null,
-        notes: `AI-detected: ${violation.rule_triggered} at ${violation.timestamp_s}s in video`,
+        vehicle_type: violation.vehicle_type || null,
+        rule_triggered: violation.rule_triggered || 'Unknown',
+        location: violation.location || 'Video Upload Analysis',
+        ai_confidence: violation.ai_confidence || 0.5,
+        evidence_image_url: violation.evidence_image_url || null,
+        verification_status: 'PENDING_REVIEW',
       });
       if (err) throw err;
-      alert(`Ticket ${ticketNumber} issued successfully!`);
+      alert('Detection added to Staff Review Queue. Staff must review, search PUV database, and confirm the violation.');
     } catch (err: any) {
-      console.error('Ticket issue failed:', err);
-      alert(`Failed to issue ticket: ${err.message}`);
+      alert(`Failed to send to review queue: ${err.message}`);
     }
   };
 
@@ -501,22 +691,38 @@ export function AIMonitorPage() {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  const pendingCandidates = candidates.filter(c => c.verification_status === 'AI_SUGGESTED');
+  const pendingCandidates = candidates.filter(c =>
+    c.verification_status === 'AI_SUGGESTED' || c.verification_status === 'PENDING_REVIEW'
+  );
 
   return (
     <div>
-      {selectedCandidate && (
-        <CreateTicketModal 
-          onClose={() => setSelectedCandidate(null)} 
-          onSuccess={() => {
-            setCandidates(prev => prev.map(c => c.id === selectedCandidate.id ? { ...c, verification_status: 'VERIFIED' as const } : c));
-            setSelectedCandidate(null);
-            alert('Ticket successfully created and saved!');
-          }}
-          initialData={selectedCandidate}
-          violationTypes={violationTypes}
-        />
+
+      {liveAlerts.length > 0 && (
+        <div style={{
+          position: 'fixed', bottom: 24, right: 24,
+          zIndex: 9999, display: 'flex', flexDirection: 'column', gap: 12,
+          maxHeight: '90vh', overflowY: 'auto',
+          pointerEvents: 'none',
+        }}>
+          <style>{`
+            @keyframes slideInRight {
+              from { opacity: 0; transform: translateX(40px) scale(0.95); }
+              to   { opacity: 1; transform: translateX(0) scale(1); }
+            }
+          `}</style>
+          {liveAlerts.map(liveAlert => (
+            <div key={liveAlert._alertId} style={{ pointerEvents: 'all' }}>
+              <LiveViolationAlert
+                violationAlert={liveAlert}
+                onDismiss={() => dismissAlert(liveAlert._alertId)}
+                onSendToReview={() => handleSendAlertToReview(liveAlert)}
+              />
+            </div>
+          ))}
+        </div>
       )}
+
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <div>
           <h1 style={{ fontSize: '1.3rem', fontWeight: 700, color: '#0f172a', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -541,7 +747,7 @@ export function AIMonitorPage() {
         </div>
       </div>
 
-      {/* Warning banner */}
+      {}
       <div style={{
         background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 8,
         padding: '12px 16px', marginBottom: 20, display: 'flex', gap: 10, alignItems: 'flex-start'
@@ -552,7 +758,7 @@ export function AIMonitorPage() {
         </div>
       </div>
 
-      {/* Tabs */}
+      {}
       <div style={{ display: 'flex', gap: 0, marginBottom: 20, borderBottom: '2px solid #e2e8f0' }}>
         {[
           { key: 'live', label: 'Live Dashboard', badge: 0 },
@@ -585,9 +791,30 @@ export function AIMonitorPage() {
         ))}
       </div>
 
-      {/* Candidates Tab */}
+      {}
       {activeTab === 'candidates' && (
         <div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
+            {pendingCandidates.length > 0 && (
+              <button className="btn btn-danger btn-sm" onClick={async () => {
+                if (!confirm('Are you sure you want to DELETE ALL pending violation candidates? This cannot be undone.')) return;
+                try {
+                  const { error } = await supabase.from('ai_violation_candidates')
+                    .delete()
+                    .in('verification_status', ['PENDING_REVIEW', 'AI_SUGGESTED']);
+                  if (error) throw error;
+                  
+                  
+                  setCandidates(prev => prev.filter(c => c.verification_status !== 'PENDING_REVIEW' && c.verification_status !== 'AI_SUGGESTED'));
+                } catch(e: any) { 
+                  console.error(e);
+                  alert('Delete failed: ' + e.message);
+                }
+              }} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <XCircle size={13} /> Delete All Pending
+              </button>
+            )}
+          </div>
           {pendingCandidates.length === 0 && (
             <div style={{ background: 'white', borderRadius: 8, border: '1px solid #e2e8f0', padding: 40, textAlign: 'center' }}>
               <CheckCircle size={40} color="#22c55e" style={{ margin: '0 auto 12px', display: 'block' }} />
@@ -598,7 +825,7 @@ export function AIMonitorPage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: 14 }}>
             {pendingCandidates.map(c => (
               <CandidateCard key={c.id} candidate={c}
-                onVerify={() => handleVerify(c)}
+                onSendToReview={() => handleSendToReview(c)}
                 onReject={() => handleReject(c.id)} />
             ))}
           </div>
@@ -629,12 +856,12 @@ export function AIMonitorPage() {
         </div>
       )}
 
-      {/* Live Stream Tab */}
+      {}
       {activeTab === 'live' && (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 20 }}>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            {/* Camera Source Selector */}
+            {}
             <div style={{ background: 'white', borderRadius: 10, border: '1px solid #e2e8f0', padding: 16 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                 <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b' }}>Camera Sources</h3>
@@ -646,6 +873,12 @@ export function AIMonitorPage() {
                 </button>
               </div>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <button 
+                  onClick={() => changeSource('server')}
+                  className={`btn ${selectedSource === 'server' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
+                >
+                  <FileVideo size={14}/> Server Videos
+                </button>
                 <button 
                   onClick={() => changeSource('cam1')}
                   className={`btn ${selectedSource === 'cam1' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
@@ -688,7 +921,9 @@ export function AIMonitorPage() {
                         <div style={{ color: '#991b1b' }}><strong>Error:</strong> {testResult.error}</div>
                       ) : (
                         <div>
-                          <div style={{ color: '#166534', fontWeight: 600, marginBottom: 4 }}>✓ Connection Successful</div>
+                          <div style={{ color: '#166534', fontWeight: 600, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
+                            <Check size={16} /> Connection Successful
+                          </div>
                           <div style={{ color: '#166534' }}>
                             Type: {testResult.stream_type.toUpperCase()} • Res: {testResult.width}x{testResult.height} • FPS: {testResult.fps}
                           </div>
@@ -705,19 +940,80 @@ export function AIMonitorPage() {
                   )}
                 </div>
               )}
+
+              {}
+              {selectedSource === 'server' && (
+                <div style={{ marginTop: 12, padding: 14, background: '#f8fafc', borderRadius: 8, border: '1px solid #e2e8f0' }}>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#475569', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <FolderOpen size={16} color="#3b82f6" /> Select a server-side video file:
+                  </div>
+                  {serverVideos.length === 0 ? (
+                    <div style={{ color: '#94a3b8', fontSize: '0.8rem' }}>No videos found. Add .mp4 files to test-videos/uploads/</div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      {serverVideos.map(v => (
+                        <label key={v.path} style={{
+                          display: 'flex', alignItems: 'center', gap: 10,
+                          padding: '10px 12px', borderRadius: 6, cursor: 'pointer',
+                          border: `2px solid ${selectedServerVideo === v.path ? '#3a65ae' : '#e2e8f0'}`,
+                          background: selectedServerVideo === v.path ? '#eff6ff' : 'white',
+                          transition: 'all 0.15s',
+                        }}>
+                          <input
+                            type="radio"
+                            name="server-video"
+                            value={v.path}
+                            checked={selectedServerVideo === v.path}
+                            onChange={() => setSelectedServerVideo(v.path)}
+                            style={{ accentColor: '#3a65ae' }}
+                          />
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#1e293b' }}>
+                              {v.filename === 'training.mp4' && '⭐ '}{v.filename}
+                            </div>
+                            <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>
+                              {v.folder} • {v.size_mb} MB
+                            </div>
+                          </div>
+                          {selectedServerVideo === v.path && (
+                            <span style={{ fontSize: '0.7rem', background: '#dbeafe', color: '#1d4ed8', padding: '2px 8px', borderRadius: 9999, fontWeight: 600 }}>Selected</span>
+                          )}
+                        </label>
+                      ))}
+                      <button
+                        className="btn btn-primary"
+                        onClick={applyServerVideo}
+                        disabled={applyingVideo || !selectedServerVideo}
+                        style={{ marginTop: 6, alignSelf: 'flex-start' }}
+                      >
+                        {applyingVideo ? '⏳ Applying...' : '▶ Load & Start AI Stream'}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
-            {/* Video Player */}
+            {}
             <div style={{ background: 'white', borderRadius: 10, border: '1px solid #e2e8f0', overflow: 'hidden' }}>
               <div style={{ background: '#0f172a', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                   <Video size={18} color="#e2e8f0" />
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
                     <span style={{ color: 'white', fontWeight: 600, fontSize: '0.9rem' }}>
-                      {selectedSource === 'cam1' ? 'CAM-001: Leon Garcia St.' : 
+                      {selectedSource === 'server' ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <Video size={14} /> {activeVideoName}
+                        </div>
+                      ) : selectedSource === 'cam1' ? 'CAM-001: Leon Garcia St.' : 
                        selectedSource === 'webcam' ? 'Webcam YOLO Testing' : 
                        'Custom Authorized Stream'}
                     </span>
+                    {selectedSource === 'server' && (
+                      <span style={{ color: '#94a3b8', fontSize: '0.7rem' }}>
+                        Source: Server Video • YOLOv8s + ph_traffic_v12
+                      </span>
+                    )}
                     {selectedSource === 'cam1' && (
                       <span style={{ color: '#94a3b8', fontSize: '0.7rem' }}>
                         Source: Local MP4 • sample.mp4
@@ -755,12 +1051,8 @@ export function AIMonitorPage() {
                 {selectedSource === 'webcam' ? (
                   <>
                     <video ref={webcamRef} autoPlay playsInline muted style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                    {/* Render basic bounding boxes over webcam */}
-                    {webcamDetections.map((d, i) => {
-                      // Adjust coordinates based on original video resolution vs display resolution
-                      // For this basic preview, we just use percentages if possible, but the API returns absolute pixels.
-                      // We will let it be simple for now.
-                      return (
+                    {}
+                    {webcamDetections.map((d, i) => (
                         <div key={i} style={{
                           position: 'absolute', border: '2px solid #22c55e',
                           left: `${(d.bbox[0] / (webcamRef.current?.videoWidth || 1)) * 100}%`,
@@ -773,8 +1065,7 @@ export function AIMonitorPage() {
                             {d.vehicle_type}
                           </span>
                         </div>
-                      )
-                    })}
+                    ))}
                   </>
                 ) : cameraRunning ? (
                   <img 
@@ -847,7 +1138,7 @@ export function AIMonitorPage() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: 10, borderBottom: '1px solid #f1f5f9' }}>
                   <span style={{ fontSize: '0.8rem', color: '#64748b' }}>VIDEO SOURCE</span>
                   <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#3b82f6' }}>
-                    {selectedSource === 'cam1' ? '● sample.mp4' : selectedSource === 'webcam' ? '● WEBCAM' : '● CUSTOM HLS'}
+                    {selectedSource === 'server' ? `● ${activeVideoName}` : selectedSource === 'cam1' ? '● sample.mp4' : selectedSource === 'webcam' ? '● WEBCAM' : '● CUSTOM HLS'}
                   </span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: 10, borderBottom: '1px solid #f1f5f9' }}>
@@ -906,12 +1197,12 @@ export function AIMonitorPage() {
         </div>
       )}
 
-      {/* Upload Analysis Tab */}
+      {}
       {activeTab === 'upload' && (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-          {/* Left — Upload panel */}
+          {}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {/* Drop Zone */}
+            {}
             <div
               onDrop={handleDrop}
               onDragOver={e => e.preventDefault()}
@@ -938,7 +1229,7 @@ export function AIMonitorPage() {
               </p>
             </div>
 
-            {/* Video preview */}
+            {}
             {previewUrl && (
               <div style={{ position: 'relative' }}>
                 <video
@@ -960,7 +1251,7 @@ export function AIMonitorPage() {
               </div>
             )}
 
-            {/* Analyze button */}
+            {}
             <button
               className="btn btn-primary"
               onClick={handleAnalyze}
@@ -986,7 +1277,7 @@ export function AIMonitorPage() {
             )}
           </div>
 
-          {/* Right — Results */}
+          {}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {!result && !analyzing && (
               <div style={{
@@ -1054,7 +1345,7 @@ export function AIMonitorPage() {
                                 onClick={() => handleIssueUploadTicket(v)}
                                 style={{ padding: '4px 10px', background: '#0f172a', color: 'white', border: 'none', borderRadius: 5, fontSize: '0.7rem', cursor: 'pointer' }}
                               >
-                                Issue Ticket
+                                Send to Review
                               </button>
                             </div>
                           </div>

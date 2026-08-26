@@ -26,7 +26,7 @@ export function CreateTicketModal({ onClose, onSuccess, initialData, violationTy
 
   const selectedViol = violationTypes.find(v => v.id === violation);
 
-  // If initialData provides a rule name, try to map it to a violation_type_id
+  
   useEffect(() => {
     if (initialData?.rule_triggered) {
       const match = violationTypes.find(v => 
@@ -63,7 +63,7 @@ export function CreateTicketModal({ onClose, onSuccess, initialData, violationTy
 
       if (error) throw error;
       
-      // If this came from AI Monitor, update the candidate status
+      
       if (initialData?.id) {
         await supabase.from('ai_violation_candidates').update({ verification_status: 'VERIFIED' }).eq('id', initialData.id);
       }
@@ -252,7 +252,7 @@ export function ViolationsPage() {
         </div>
       </div>
 
-      {/* Summary */}
+      {}
       <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
         {[
           { label: 'Total Tickets', value: tickets.length, color: '#3a65ae' },
@@ -270,7 +270,7 @@ export function ViolationsPage() {
         ))}
       </div>
 
-      {/* Filters */}
+      {}
       <div style={{
         background: 'white', border: '1px solid #e2e8f0', borderRadius: 8,
         padding: '14px 16px', marginBottom: 16, display: 'flex', gap: 12, flexWrap: 'wrap'

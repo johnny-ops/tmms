@@ -3,6 +3,64 @@ import { ShieldCheck, Plus, Search, Download, AlertTriangle, Edit, Eye } from 'l
 import { supabase } from '@/lib/supabase';
 import { getStatusBadgeClass, formatStatus, formatDate } from '@/lib/utils';
 
+function AddRecordModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
+  const [formData, setFormData] = useState({ plate_number: '', make: '', model: '', capacity: 10, registration_expiry: '' });
+  const [loading, setLoading] = useState(false);
+
+  async function handleSave() {
+    if (!formData.plate_number || !formData.make || !formData.model || !formData.registration_expiry) {
+      alert('Please fill out all required fields.');
+      return;
+    }
+    setLoading(true);
+    try {
+      const { error } = await supabase.from('vehicles').insert([formData]);
+      if (error) throw error;
+      alert('Record added successfully!');
+      onSuccess();
+    } catch (err: any) {
+      alert('Error adding record: ' + err.message);
+    }
+    setLoading(false);
+  }
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+      <div style={{ background: 'white', borderRadius: 12, width: '100%', maxWidth: 450, padding: 24, boxShadow: '0 24px 64px rgba(0,0,0,0.2)' }}>
+        <h2 style={{ fontSize: '1rem', fontWeight: 700, color: '#1e293b', marginBottom: 20 }}>Add Vehicle Registration</h2>
+        
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+          <div style={{ gridColumn: 'span 2' }}>
+            <label className="form-label">Plate Number *</label>
+            <input type="text" className="form-input" value={formData.plate_number} onChange={e => setFormData({ ...formData, plate_number: e.target.value })} placeholder="e.g. ABC-1234" />
+          </div>
+          <div>
+            <label className="form-label">Make *</label>
+            <input type="text" className="form-input" value={formData.make} onChange={e => setFormData({ ...formData, make: e.target.value })} placeholder="e.g. Toyota" />
+          </div>
+          <div>
+            <label className="form-label">Model *</label>
+            <input type="text" className="form-input" value={formData.model} onChange={e => setFormData({ ...formData, model: e.target.value })} placeholder="e.g. Hiace" />
+          </div>
+          <div>
+            <label className="form-label">Capacity *</label>
+            <input type="number" className="form-input" value={formData.capacity} onChange={e => setFormData({ ...formData, capacity: parseInt(e.target.value) || 1 })} min="1" />
+          </div>
+          <div>
+            <label className="form-label">Reg. Expiry *</label>
+            <input type="date" className="form-input" value={formData.registration_expiry} onChange={e => setFormData({ ...formData, registration_expiry: e.target.value })} />
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+          <button className="btn btn-secondary" onClick={onClose} disabled={loading}>Cancel</button>
+          <button className="btn btn-primary" onClick={handleSave} disabled={loading}>{loading ? 'Saving...' : 'Save Record'}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function RenewModal({ vehicle, onClose, onSuccess }: { vehicle: any; onClose: () => void; onSuccess: () => void }) {
   const [newDate, setNewDate] = useState('');
   const [loading, setLoading] = useState(false);
@@ -111,6 +169,7 @@ export function RegistrationsPage() {
   };
 
   const [renewingVehicle, setRenewingVehicle] = useState<any | null>(null);
+  const [isAdding, setIsAdding] = useState(false);
 
   return (
     <div>
@@ -124,6 +183,15 @@ export function RegistrationsPage() {
           }} 
         />
       )}
+      {isAdding && (
+        <AddRecordModal
+          onClose={() => setIsAdding(false)}
+          onSuccess={() => {
+            setIsAdding(false);
+            window.location.reload();
+          }}
+        />
+      )}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <div>
           <h1 style={{ fontSize: '1.3rem', fontWeight: 700, color: '#0f172a', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -133,11 +201,11 @@ export function RegistrationsPage() {
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           <button className="btn btn-secondary btn-sm"><Download size={14} /> Export</button>
-          <button className="btn btn-primary btn-sm"><Plus size={14} /> Add Record</button>
+          <button className="btn btn-primary btn-sm" onClick={() => setIsAdding(true)}><Plus size={14} /> Add Record</button>
         </div>
       </div>
 
-      {/* Stats */}
+      {}
       <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
         {[
           { label: 'Total Vehicles', value: vehicles.length, color: '#3a65ae', filter: '' },
@@ -153,7 +221,7 @@ export function RegistrationsPage() {
         ))}
       </div>
 
-      {/* Expiry warning */}
+      {}
       {vehicles.filter(v => isExpired(v.registration_expiry)).length > 0 && (
         <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, padding: '10px 16px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
           <AlertTriangle size={16} color="#ef4444" />

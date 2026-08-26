@@ -11,7 +11,7 @@ export function OperatorsPage() {
   const [page, setPage] = useState(1);
   const limit = 10;
   
-  // Modal state
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
@@ -101,7 +101,7 @@ export function OperatorsPage() {
 
   return (
     <div>
-      {/* Header */}
+      {}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
         <div>
           <h1 style={{ fontSize: '1.3rem', fontWeight: 700, color: '#0f172a', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -115,7 +115,7 @@ export function OperatorsPage() {
         </div>
       </div>
 
-      {/* Summary Pills */}
+      {}
       <div style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
         {[
           { label: 'Total Operators', value: operators.length, color: '#3a65ae' },
@@ -129,9 +129,9 @@ export function OperatorsPage() {
         ))}
       </div>
 
-      {/* Table card */}
+      {}
       <div style={{ background: 'white', borderRadius: 10, border: '1px solid #e2e8f0', overflow: 'hidden' }}>
-        {/* Search bar */}
+        {}
         <div style={{ padding: '14px 20px', borderBottom: '1px solid #f1f5f9', display: 'flex', gap: 12 }}>
           <div style={{ position: 'relative', flex: 1, maxWidth: 340 }}>
             <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
@@ -146,7 +146,7 @@ export function OperatorsPage() {
           </div>
         </div>
 
-        {/* Table */}
+        {}
         <div style={{ overflowX: 'auto' }}>
           <table className="data-table">
             <thead>
@@ -207,7 +207,7 @@ export function OperatorsPage() {
           </table>
         </div>
 
-        {/* Pagination */}
+        {}
         <div style={{ padding: '12px 20px', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
             Showing {Math.min((page - 1) * limit + 1, total)}–{Math.min(page * limit, total)} of {total} operators

@@ -1,16 +1,10 @@
-/**
- * useTable — a generic hook that fetches a Supabase table
- * and falls back to demo data when running without credentials.
- *
- * Usage:
- *   const { data: vehicles, loading, error, refetch } = useTable('vehicles');
- */
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 
 export function useTable<T = any>(
   table: string,
-  _unusedFallback?: T[], // Kept for backwards compatibility with existing component signatures temporarily, will be ignored
+  _unusedFallback?: T[], 
   options?: {
     select?: string;
     orderBy?: string;
@@ -55,10 +49,7 @@ export function useTable<T = any>(
   return { data, loading, error, refetch: fetch, isConnected: true };
 }
 
-/**
- * useRealtime — subscribes to INSERT events on a Supabase table.
- * Calls onInsert() with the new row payload.
- */
+
 export function useRealtime<T = any>(
   table: string,
   onInsert?: (row: T) => void,

@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { DocumentUpload } from '@/components/ui/DocumentUpload';
 import { EvidenceViewer } from '@/components/ui/EvidenceViewer';
 
-// Inspection checklist categories
+
 const CHECKLIST_ITEMS = [
   { category: 'Safety', items: ['Brakes', 'Steering', 'Tires', 'Suspension'] },
   { category: 'Lighting', items: ['Headlights', 'Taillights', 'Turn Signals', 'Brake Lights'] },
@@ -37,7 +37,7 @@ function InspectionModal({ vehicleId, vehicles, onClose, onSuccess }: { vehicleI
       return;
     }
     
-    // If not all items are answered, we can only save it as scheduled, not completed
+    
     const isCompleted = overall !== null;
     
     setLoading(true);
@@ -56,7 +56,7 @@ function InspectionModal({ vehicleId, vehicles, onClose, onSuccess }: { vehicleI
 
       if (error) throw error;
       
-      // If inspection is completed and failed, update vehicle status to FOR_INSPECTION
+      
       if (isCompleted && overall === 'FAILED') {
           await supabase.from('vehicles').update({ status: 'FOR_INSPECTION' }).eq('id', selectedVehicle);
       } else if (isCompleted && overall === 'PASSED') {
@@ -273,7 +273,7 @@ export function InspectionsPage() {
         </div>
       </div>
 
-      {/* Summary */}
+      {}
       <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
         {[
           { label: 'Total', value: inspectionsList.length, color: '#3a65ae' },
@@ -292,7 +292,7 @@ export function InspectionsPage() {
         ))}
       </div>
 
-      {/* Filters */}
+      {}
       <div style={{
         background: 'white', border: '1px solid #e2e8f0', borderRadius: 8,
         padding: '14px 16px', marginBottom: 16, display: 'flex', gap: 12, flexWrap: 'wrap'

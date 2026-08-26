@@ -28,7 +28,7 @@ export function PUVPage() {
   const [page, setPage] = useState(1);
   const limit = 10;
   
-  // Modal state
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
@@ -98,7 +98,7 @@ export function PUVPage() {
       year: formData.year || null,
       capacity: Number(formData.capacity) || 1,
       operator_id: formData.operator_id || null,
-      // registration_expiry must be a valid DATE string (YYYY-MM-DD)
+      
       registration_expiry: formData.registration_expiry || null,
     };
 
@@ -155,7 +155,7 @@ export function PUVPage() {
 
   return (
     <div>
-      {/* Page Header */}
+      {}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <div>
           <h1 style={{ fontSize: '1.3rem', fontWeight: 700, color: '#0f172a', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -175,7 +175,7 @@ export function PUVPage() {
         </div>
       </div>
 
-      {/* Summary stats */}
+      {}
       <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
         {[
           { label: 'Total', value: vehicles.length, color: '#3a65ae' },
@@ -193,7 +193,7 @@ export function PUVPage() {
         ))}
       </div>
 
-      {/* Filters */}
+      {}
       <div style={{
         background: 'white', border: '1px solid #e2e8f0', borderRadius: 8,
         padding: '14px 16px', marginBottom: 16, display: 'flex', gap: 12, flexWrap: 'wrap'
@@ -221,7 +221,7 @@ export function PUVPage() {
         </button>
       </div>
 
-      {/* Table */}
+      {}
       <div style={{ background: 'white', borderRadius: 8, border: '1px solid #e2e8f0', overflow: 'hidden' }}>
         <div style={{ overflowX: 'auto' }}>
           <table className="data-table">
@@ -279,7 +279,7 @@ export function PUVPage() {
           </table>
         </div>
 
-        {/* Pagination */}
+        {}
         <div style={{
           padding: '12px 16px', borderTop: '1px solid #f1f5f9',
           display: 'flex', justifyContent: 'space-between', alignItems: 'center'

@@ -1,0 +1,83 @@
+
+import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '@/lib/supabase';
+
+export function useTable<T = any>(
+  table: string,
+  _unusedFallback?: T[], 
+  options?: {
+    select?: string;
+    orderBy?: string;
+    ascending?: boolean;
+    filter?: { column: string; value: any };
+  }
+) {
+  const [data, setData] = useState<T[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetch = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      let query = supabase.from(table).select(options?.select ?? '*');
+      if (options?.filter) {
+        query = query.eq(options.filter.column, options.filter.value);
+      }
+      if (options?.orderBy) {
+        query = query.order(options.orderBy, { ascending: options?.ascending ?? true });
+      }
+      const { data: rows, error: err } = await query;
+      if (err) {
+        console.error(`[useTable:${table}] error:`, err.message);
+        setError(err.message);
+        setData([]);
+      } else {
+        setData((rows ?? []) as T[]);
+      }
+    } catch (e: any) {
+      console.error(`[useTable:${table}] exception:`, e.message);
+      setError(e.message);
+      setData([]);
+    } finally {
+      setLoading(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [table, JSON.stringify(options)]);
+
+  useEffect(() => { fetch(); }, [fetch]);
+
+  return { data, loading, error, refetch: fetch, isConnected: true };
+}
+
+
+export function useRealtime<T = any>(
+  table: string,
+  onInsert?: (row: T) => void,
+  onUpdate?: (row: T) => void,
+  onDelete?: (row: T) => void
+) {
+  useEffect(() => {
+
+    const channel = supabase
+      .channel(`realtime:${table}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table },
+        (payload) => {
+          if (payload.eventType === 'INSERT' && onInsert) {
+            onInsert(payload.new as T);
+          }
+          if (payload.eventType === 'UPDATE' && onUpdate) {
+            onUpdate(payload.new as T);
+          }
+          if (payload.eventType === 'DELETE' && onDelete) {
+            onDelete(payload.old as T);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [table]);
+}

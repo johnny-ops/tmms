@@ -7,3 +7,7 @@ uvicorn[standard]==0.30.6
 websockets==13.0.1
 numpy==1.26.4
 python-multipart==0.0.12
+# License plate OCR — install separately (large download ~100MB models on first run)
+# Run: pip install easyocr
+# Then set OCR_ENABLED=true in .env
+# easyocr>=1.7.0

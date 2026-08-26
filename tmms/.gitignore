@@ -1,0 +1,92 @@
+# ===================================
+# Environment & Secrets
+# ===================================
+.env
+.env.local
+.env.production
+.env.development
+.env.*.local
+*.env
+
+# ===================================
+# Node / npm
+# ===================================
+node_modules/
+dist/
+build/
+.cache/
+.turbo/
+*.tsbuildinfo
+
+# ===================================
+# Python / AI Service
+# ===================================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+venv/
+.venv/
+env/
+*.egg-info/
+.eggs/
+*.log
+
+# ===================================
+# ML Models & Training Data
+# ===================================
+apps/ai-service/models/
+apps/ai-service/YOLOv8/
+apps/ai-service/dataset/
+apps/ai-service/datasets/
+apps/ai-service/tmms_model/
+apps/ai-service/tools/
+*.pt
+*.onnx
+*.weights
+runs/
+# YOLOv8 dataset folders (with and without spaces)
+PH Vehicles.v1i.yolov8/
+Red Traffic Light Violation.v1i.yolov8/
+*v1i.yolov8/
+../Red Traffic Light Violation.v1i.yolov8/
+../PH Vehicles.v1i.yolov8/
+../training-monitor/
+
+# ===================================
+# Test Videos & Media
+# ===================================
+apps/ai-service/test-videos/*.mp4
+apps/ai-service/test-videos/*.avi
+apps/ai-service/test-videos/*.mov
+*.mp4
+*.avi
+*.mov
+
+# ===================================
+# IDE & OS
+# ===================================
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===================================
+# Logs
+# ===================================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ===================================
+# Misc
+# ===================================
+scratch_old_app.tsx
+extract_log.py
+test_db.js
