@@ -1,6 +1,0 @@
-train: C:/xampp/htdocs/GOVSERVE/Red Traffic Light Violation.v1i.yolov8/train/images
-val: C:/xampp/htdocs/GOVSERVE/Red Traffic Light Violation.v1i.yolov8/valid/images
-test: C:/xampp/htdocs/GOVSERVE/Red Traffic Light Violation.v1i.yolov8/test/images
-
-nc: 4
-names: ['green_light', 'red_light', 'vehicle', 'yellow_light']

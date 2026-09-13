@@ -55,3 +55,8 @@ supabase/migrations/.shadow/
 # Database files (keep locally, do not push to GitHub)
 tmms/packages/database/
 tmms/supabase/
+
+# Large training datasets - exclude from GitHub
+Red Traffic Light Violation.v1i.yolov8/
+training-monitor/
+tuts
