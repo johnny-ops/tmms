@@ -90,3 +90,6 @@ yarn-error.log*
 scratch_old_app.tsx
 extract_log.py
 test_db.js
+
+# Exclude database scripts
+packages/database/
