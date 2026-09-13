@@ -27,41 +27,45 @@ export function LoginPage() {
     <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#ffffff' }}>
 
       {/* LEFT PANEL */}
-      <div style={{
+      <div className="auth-left" style={{
         flex: '0 0 50%',
-        backgroundColor: '#1b2a47',
+        backgroundColor: '#0a1128', // Darker navy blue matching reference
         position: 'relative',
         display: 'flex',
         flexDirection: 'column',
+        alignItems: 'center', // Center horizontally
         justifyContent: 'center',
-        padding: '80px',
+        padding: '40px',
         overflow: 'hidden',
+        textAlign: 'center', // Center text
       }}>
         <div style={{
           position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-          width: '110%', height: '110%', backgroundImage: 'url(/logo.jpg)', backgroundSize: 'contain',
-          backgroundPosition: 'center', backgroundRepeat: 'no-repeat', opacity: 0.18, pointerEvents: 'none',
-          filter: 'grayscale(20%) contrast(110%)',
+          width: '120%', height: '120%', backgroundImage: 'url(/LGO.jpg)', backgroundSize: 'contain',
+          backgroundPosition: 'center', backgroundRepeat: 'no-repeat', opacity: 0.15, pointerEvents: 'none',
+          filter: 'grayscale(10%) contrast(110%)', mixBlendMode: 'lighten'
         }} />
-        <div style={{ position: 'absolute', top: 40, left: 60, zIndex: 10, fontSize: '0.6rem', fontWeight: 700, color: '#94a3b8', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
-          GOVSERVE
-        </div>
-        <div style={{ position: 'relative', zIndex: 10 }}>
-          <h1 style={{ fontSize: '3rem', fontWeight: 800, color: '#ffffff', lineHeight: 1.1, marginBottom: 20, letterSpacing: '-0.02em' }}>
+        <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#cbd5e1', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 20 }}>
+            GOVSERVE
+          </div>
+          <h1 style={{ fontSize: '3.2rem', fontWeight: 800, color: '#ffffff', lineHeight: 1.1, marginBottom: 24, letterSpacing: '-0.02em', textShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
             TRANSPORT &amp;<br />MOBILITY SYSTEM
           </h1>
-          <p style={{ fontSize: '0.875rem', color: '#94a3b8', lineHeight: 1.7, maxWidth: 380 }}>
-            A centralized digital platform for securely managing local government revenue services, taxpayer accounts, and treasury records.
+          <p style={{ fontSize: '0.95rem', color: '#cbd5e1', lineHeight: 1.7, maxWidth: 440, textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
+            A centralized digital platform for efficient transport regulation real-time monitoring and sustainable mobility management for local government units
           </p>
         </div>
       </div>
 
       {/* RIGHT PANEL */}
-      <div style={{ flex: '0 0 50%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px', backgroundColor: '#f8fafc' }}>
+      <div className="auth-right" style={{ flex: '0 0 50%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px', backgroundColor: '#f8fafc' }}>
         <div style={{ width: '100%', maxWidth: 420, backgroundColor: '#ffffff', borderRadius: 20, boxShadow: '0 20px 60px rgba(0,0,0,0.08)', border: '1px solid #e9eef5', padding: '48px 40px' }}>
           
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 32 }}>
-            <img src="/logo.jpg" alt="Logo" style={{ width: 72, height: 72, objectFit: 'contain', marginBottom: 16 }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+            <div style={{ width: 80, height: 80, borderRadius: '50%', backgroundColor: '#0a1128', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16, overflow: 'hidden', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+              <img src="/LGO.jpg" alt="Logo" style={{ width: 74, height: 74, objectFit: 'contain', mixBlendMode: 'lighten' }} onError={(e) => { (e.target as HTMLImageElement).parentElement!.style.display = 'none'; }} />
+            </div>
             <h2 style={{ fontSize: '1.3rem', fontWeight: 800, color: '#0f172a', marginBottom: 4, textAlign: 'center', letterSpacing: '-0.02em' }}>
               {user ? 'Already Logged In' : 'Sign in to your account'}
             </h2>

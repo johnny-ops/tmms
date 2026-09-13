@@ -41,7 +41,9 @@ export function DriverProfilePage() {
           </div>
 
           <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#0f172a', marginBottom: 4 }}>
-            {driverProfile?.full_name || user?.full_name || 'Driver Name'}
+            {driverProfile?.last_name && driverProfile?.first_name 
+              ? `${driverProfile.last_name}, ${driverProfile.first_name}${driverProfile.middle_name ? ' ' + driverProfile.middle_name : ''}`
+              : driverProfile?.full_name || user?.full_name || 'Driver Name'}
           </h2>
           <span className="badge badge-active" style={{ marginBottom: 24, display: 'inline-block', background: '#d1fae5', color: '#065f46' }}>
             VERIFIED DRIVER

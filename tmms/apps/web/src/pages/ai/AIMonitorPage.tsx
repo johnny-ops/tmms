@@ -275,35 +275,57 @@ export function AIMonitorPage() {
   }, [dismissAlert]);
 
   useEffect(() => {
-    
-    fetch(`${AI_BASE}/health`)
-      .then(r => r.ok ? setAiOnline(true) : setAiOnline(false))
-      .catch(() => setAiOnline(false));
+    let isMounted = true;
 
-    
-    fetch(`${AI_BASE}/api/videos`)
-      .then(r => r.json())
-      .then(data => {
-        if (data.videos && data.videos.length > 0) {
-          setServerVideos(data.videos);
-          
-          const training = data.videos.find((v: any) => v.filename === 'training.mp4');
-          const first = training || data.videos[0];
+    async function initAIAndCamera() {
+      // 1. Check AI service health
+      try {
+        const healthRes = await fetch(`${AI_BASE}/health`);
+        if (isMounted) setAiOnline(healthRes.ok);
+        if (!healthRes.ok) return; // AI offline — don't proceed
+      } catch {
+        if (isMounted) setAiOnline(false);
+        return;
+      }
+
+      // 2. Load server videos list
+      try {
+        const vidRes = await fetch(`${AI_BASE}/api/videos`);
+        const vidData = await vidRes.json();
+        if (isMounted && vidData.videos && vidData.videos.length > 0) {
+          setServerVideos(vidData.videos);
+          const training = vidData.videos.find((v: any) => v.filename === 'training.mp4');
+          const first = training || vidData.videos[0];
           setSelectedServerVideo(first.path);
           setActiveVideoName(first.filename);
         }
-      })
-      .catch(() => {});
+      } catch { /* videos endpoint optional */ }
 
-    
-    fetch(`${AI_BASE}/api/cameras/CAM-001/status`)
-      .then(res => res.json())
-      .then(async data => {
-        if (data.running) {
+      // 3. Check camera status — auto-start if not running
+      try {
+        const statusRes = await fetch(`${AI_BASE}/api/cameras/CAM-001/status`);
+        const statusData = await statusRes.json();
+        if (!isMounted) return;
+
+        if (statusData.running) {
           setCameraRunning(true);
+        } else {
+          // Auto-start the camera so detection begins immediately
+          try {
+            await fetch(`${AI_BASE}/api/cameras/CAM-001/start`, { method: 'POST' });
+            if (isMounted) setCameraRunning(true);
+          } catch {
+            if (isMounted) setCameraRunning(false);
+          }
         }
-      })
-      .catch(() => setCameraRunning(false));
+      } catch {
+        if (isMounted) setCameraRunning(false);
+      }
+    }
+
+    initAIAndCamera();
+
+    return () => { isMounted = false; };
   }, []);
 
   useEffect(() => {
@@ -312,16 +334,21 @@ export function AIMonitorPage() {
     let ws: WebSocket | null = null;
     let retryTimeout: ReturnType<typeof setTimeout> | null = null;
     let isCleaning = false;
+    let retryCount = 0;
+    const MAX_RETRIES = 10;
 
     const connectWs = () => {
-      if (isCleaning) return;
+      if (isCleaning || retryCount >= MAX_RETRIES) return;
+      // Don't create a new WS if one is already open
+      if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return;
+
+      retryCount++;
       ws = new WebSocket(`${AI_BASE.replace('http', 'ws')}/ws/camera/CAM-001`);
-      ws.onopen = () => setWsConnected(true);
+      ws.onopen = () => { setWsConnected(true); retryCount = 0; };
       ws.onerror = () => {}; 
       ws.onclose = () => {
         setWsConnected(false);
-        if (!isCleaning) {
-          
+        if (!isCleaning && retryCount < MAX_RETRIES) {
           retryTimeout = setTimeout(connectWs, 3000);
         }
       };
@@ -556,8 +583,8 @@ export function AIMonitorPage() {
       }
     };
     fetchCandidates();
+    const fetchInterval = setInterval(fetchCandidates, 3000);
 
-    
     let channel: any;
     try {
       channel = supabase
@@ -567,7 +594,11 @@ export function AIMonitorPage() {
           { event: 'INSERT', schema: 'public', table: 'ai_violation_candidates' },
           (payload) => {
             console.log('Realtime INSERT received:', payload.new);
-            setCandidates((prev) => [payload.new, ...prev]);
+            setCandidates((prev) => {
+              // Prevent duplicates
+              if (prev.find((c) => c.id === payload.new.id)) return prev;
+              return [payload.new, ...prev];
+            });
           }
         )
         .subscribe((status) => {
@@ -578,6 +609,7 @@ export function AIMonitorPage() {
     }
 
     return () => {
+      clearInterval(fetchInterval);
       if (channel) supabase.removeChannel(channel);
     };
   }, []);

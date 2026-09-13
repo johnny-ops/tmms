@@ -145,3 +145,24 @@ body {
   transition: color 0.15s;
 }
 .nav-link:hover { color: #fff; }
+
+/* ─── Responsive Auth Layout ────────────────────── */
+@media (max-width: 768px) {
+  .auth-left { display: none !important; }
+  .auth-right { flex: 100% !important; max-width: 100% !important; padding: 24px !important; }
+}
+
+/* ─── Mobile Portal Layout ────────────────────── */
+@media (max-width: 768px) {
+  /* Hide the sidebar entirely on mobile */
+  .desktop-sidebar { display: none !important; }
+
+  /* Show the mobile bottom nav */
+  .mobile-bottom-nav {
+    display: flex !important;
+    justify-content: space-around;
+  }
+
+  /* Main content takes full width and has a bottom nav gap */
+  main { padding: 16px 14px 90px !important; }
+}

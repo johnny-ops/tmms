@@ -327,3 +327,9 @@ body {
   overflow: hidden;
   border: 1px solid var(--border-base);
 }
+
+/* ─── Responsive Auth Layout ────────────────────── */
+@media (max-width: 768px) {
+  .auth-left { display: none !important; }
+  .auth-right { flex: 100% !important; max-width: 100% !important; padding: 24px !important; }
+}

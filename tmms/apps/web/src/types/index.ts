@@ -51,9 +51,14 @@ export interface UserProfile {
   id: string;
   email: string;
   full_name: string;
+  first_name?: string;
+  last_name?: string;
+  middle_name?: string;
   role: UserRole;
   avatar_url?: string;
   is_active: boolean;
+  approval_status?: 'PENDING' | 'APPROVED' | 'REJECTED';
+  rejection_reason?: string;
   operator_id?: string;
   driver_id?: string;
   last_login?: string;

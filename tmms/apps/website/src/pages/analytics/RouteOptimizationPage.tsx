@@ -88,6 +88,8 @@ export function RouteOptimizationPage() {
   const [clickMode, setClickMode] = useState<'start' | 'end' | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [saving, setSaving] = useState(false);
   const [mapCenter] = useState<[number, number]>([7.0647, 125.6083]); // Davao City default
   const mapRef = useRef<any>(null);
 
@@ -171,6 +173,7 @@ export function RouteOptimizationPage() {
 
   async function handleSearch() {
     setError('');
+    setSuccess('');
     setLoading(true);
     try {
       let s = startPoint, e = endPoint;
@@ -209,7 +212,51 @@ export function RouteOptimizationPage() {
     setEndQuery('');
     setRoutes([]);
     setError('');
+    setSuccess('');
     setClickMode(null);
+  }
+
+  async function saveRoute() {
+    if (!activeRoute || !user) return;
+    setSaving(true);
+    setError('');
+    setSuccess('');
+    
+    try {
+      // 1. Get the driver ID for this user
+      const { data: driverData, error: driverError } = await supabase
+        .from('drivers')
+        .select('id')
+        .eq('profile_id', user.id)
+        .maybeSingle();
+        
+      if (driverError || !driverData) {
+        throw new Error('Only registered drivers can save routes.');
+      }
+
+      // 2. Insert into driver_saved_routes
+      const { error: saveError } = await supabase
+        .from('driver_saved_routes')
+        .insert({
+          driver_id: driverData.id,
+          start_location: startQuery || 'Unknown Start',
+          end_location: endQuery || 'Unknown Destination',
+          distance_km: activeRoute.distance,
+          duration_mins: activeRoute.duration,
+          route_geometry: { coordinates: activeRoute.coordinates }
+        });
+
+      if (saveError) throw saveError;
+      
+      setSuccess('Route saved successfully!');
+      
+      // Hide success message after 3 seconds
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err: any) {
+      setError(err.message || 'Failed to save route.');
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function useCurrentLocation() {
@@ -330,6 +377,12 @@ export function RouteOptimizationPage() {
               </div>
             )}
 
+            {success && (
+              <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, padding: '8px 12px', marginBottom: 12, fontSize: '0.78rem', color: '#166534', display: 'flex', gap: 6, alignItems: 'center' }}>
+                <Circle size={13} style={{ fill: '#22c55e', color: 'white' }} /> {success}
+              </div>
+            )}
+
             <div style={{ display: 'flex', gap: 8 }}>
               <button onClick={handleReset} style={{ padding: '9px 14px', borderRadius: 8, border: '1.5px solid #e2e8f0', background: 'white', cursor: 'pointer', color: '#64748b', display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.82rem' }}>
                 <RotateCcw size={13} /> Reset
@@ -392,6 +445,18 @@ export function RouteOptimizationPage() {
                       </div>
                     ))}
                   </div>
+                  
+                  <button
+                    onClick={saveRoute}
+                    disabled={saving}
+                    style={{ 
+                      marginTop: 12, width: '100%', padding: '10px', borderRadius: 8, border: 'none', 
+                      background: saving ? '#d1d5db' : '#059669', color: 'white', cursor: saving ? 'not-allowed' : 'pointer', 
+                      fontWeight: 600, fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 
+                    }}
+                  >
+                    {saving ? <><Loader size={14} className="animate-spin" /> Saving...</> : 'Save Route'}
+                  </button>
                 </div>
               )}
             </div>

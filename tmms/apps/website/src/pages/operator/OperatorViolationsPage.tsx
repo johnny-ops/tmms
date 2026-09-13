@@ -1,24 +1,60 @@
-import { useState } from 'react';
-import { Search, AlertTriangle, CreditCard, CheckCircle2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, AlertTriangle, CreditCard, CheckCircle2, Loader2 } from 'lucide-react';
 import { useTable } from '@/hooks/useSupabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/lib/supabase';
 import { formatDate, getStatusBadgeClass, formatStatus } from '@/lib/utils';
 
 export function OperatorViolationsPage() {
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
+  const [tickets, setTickets] = useState<any[]>([]);
+  const [ticketsLoading, setTicketsLoading] = useState(true);
 
+  // 1. Get operator record for this user
   const profileFilter = user?.id ? { column: 'profile_id', value: user.id } : undefined;
   const { data: operatorRecords } = useTable<any>('operators', [], profileFilter ? { filter: profileFilter } : undefined);
-  const myOperatorId = user?.id ? (operatorRecords[0]?.id ?? null) : null;
+  const myOperatorId = operatorRecords[0]?.id ?? null;
 
-  const opFilter = myOperatorId ? { column: 'operator_id', value: myOperatorId } : null;
-  const { data: rawTickets, loading } = useTable<any>('traffic_tickets', [], opFilter ? { filter: opFilter } : undefined);
-  const { data: rawVehicles } = useTable<any>('vehicles', [], opFilter ? { filter: opFilter } : undefined);
+  // 2. Get vehicles owned by this operator
+  const opFilter = myOperatorId ? { column: 'operator_id', value: myOperatorId } : undefined;
+  const { data: vehicles } = useTable<any>('vehicles', [], opFilter ? { filter: opFilter } : undefined);
   const { data: violationTypes } = useTable<any>('violation_types');
 
-  const tickets = myOperatorId ? rawTickets : [];
-  const vehicles = myOperatorId ? rawVehicles : [];
+  // 3. Load tickets for the operator's vehicle IDs only
+  useEffect(() => {
+    if (!myOperatorId) return;
+    if (vehicles.length === 0) {
+      setTickets([]);
+      setTicketsLoading(false);
+      return;
+    }
+
+    async function loadTickets() {
+      setTicketsLoading(true);
+      try {
+        const vehicleIds = vehicles.map((v: any) => v.id);
+        const { data, error } = await supabase
+          .from('traffic_tickets')
+          .select('*')
+          .in('vehicle_id', vehicleIds)
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error('[OperatorViolations] loadTickets error:', error.message);
+          setTickets([]);
+        } else {
+          setTickets(data ?? []);
+        }
+      } catch (e) {
+        console.error(e);
+        setTickets([]);
+      } finally {
+        setTicketsLoading(false);
+      }
+    }
+    loadTickets();
+  }, [myOperatorId, vehicles.length]);
 
   const filteredTickets = tickets.filter(t =>
     t.ticket_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -30,8 +66,10 @@ export function OperatorViolationsPage() {
     return vt?.name || vt?.code || 'Unknown Violation';
   };
 
-  const totalPenalty = filteredTickets.reduce((sum: number, t: any) => sum + (t.penalty_amount || 0), 0);
+  const totalPenalty = filteredTickets.reduce((sum: number, t: any) => sum + (Number(t.penalty_amount) || 0), 0);
   const unpaidCount = filteredTickets.filter((t: any) => t.payment_status !== 'PAID').length;
+
+  const loading = ticketsLoading;
 
   return (
     <div>
@@ -96,8 +134,9 @@ export function OperatorViolationsPage() {
       <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: 10, overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
         {loading ? (
           <div style={{ padding: '60px 24px', textAlign: 'center', color: '#94a3b8' }}>
-            <AlertTriangle size={36} style={{ marginBottom: 12, opacity: 0.3 }} />
+            <Loader2 size={32} style={{ margin: '0 auto 12px', display: 'block', animation: 'spin 1s linear infinite' }} />
             <div style={{ fontSize: '0.9rem' }}>Loading violation records...</div>
+            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
           </div>
         ) : filteredTickets.length === 0 ? (
           <div style={{ padding: '60px 24px', textAlign: 'center', color: '#94a3b8' }}>
@@ -145,7 +184,7 @@ export function OperatorViolationsPage() {
                     </td>
                     <td style={{ padding: '14px 16px' }}>
                       <span style={{ fontWeight: 800, color: '#dc2626', fontSize: '0.9rem' }}>
-                        ₱{(t.penalty_amount || 0).toLocaleString()}
+                        ₱{(Number(t.penalty_amount) || 0).toLocaleString()}
                       </span>
                     </td>
                     <td style={{ padding: '14px 16px' }}>
@@ -166,13 +205,6 @@ export function OperatorViolationsPage() {
                             background: '#fef2f2', border: '1px solid #fecaca',
                             padding: '3px 8px', borderRadius: 6
                           }}>UNPAID</span>
-                          <button style={{
-                            display: 'flex', alignItems: 'center', gap: 4,
-                            padding: '4px 10px', borderRadius: 6, fontSize: '0.72rem', fontWeight: 700,
-                            background: '#1d4ed8', color: 'white', border: 'none', cursor: 'pointer'
-                          }}>
-                            <CreditCard size={11} /> Pay
-                          </button>
                         </div>
                       )}
                     </td>

@@ -36,7 +36,8 @@ import { ReportsPage } from './pages/system/ReportsPage';
 import { UsersPage } from './pages/system/UsersPage';
 import { SettingsPage } from './pages/system/SettingsPage';
 import { NotificationsPage, AuditLogsPage, PlaceholderPage } from './pages/system/SystemPages';
-import { AdminApplicationsPage } from './pages/system/AdminApplicationsPage';
+import { ApprovalPage } from './pages/system/ApprovalPage';
+import { SystemMonitoringPage } from './pages/system/SystemMonitoringPage';
 
 import { Activity, UserCheck } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
@@ -74,21 +75,20 @@ function App() {
           <Route path="/" element={<ProtectedRoute><IndexRedirect /></ProtectedRoute>} />
 
           {/* Admin Routes */}
-          <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
+          <Route path="/admin" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminLayout /></ProtectedRoute>}>
             <Route index element={<Navigate to="/admin/dashboard" replace />} />
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="users" element={<UsersPage />} />
-            <Route path="staff" element={<PlaceholderPage title="Staff Management" icon={<UserCheck size={24} />} />} />
             <Route path="operators" element={<OperatorsPage />} />
             <Route path="drivers" element={<DriversPage />} />
-            <Route path="applications" element={<AdminApplicationsPage />} />
-            <Route path="monitoring" element={<PlaceholderPage title="System Monitoring" icon={<Activity size={24} />} />} />
+            <Route path="approval" element={<ApprovalPage />} />
+            <Route path="monitoring" element={<SystemMonitoringPage />} />
             <Route path="reports" element={<ReportsPage />} />
             <Route path="settings" element={<SettingsPage />} />
           </Route>
 
           {/* Staff Routes */}
-          <Route path="/staff" element={<ProtectedRoute><StaffLayout /></ProtectedRoute>}>
+          <Route path="/staff" element={<ProtectedRoute allowedRoles={['STAFF', 'ADMIN']}><StaffLayout /></ProtectedRoute>}>
             <Route index element={<Navigate to="/staff/dashboard" replace />} />
             <Route path="dashboard" element={<StaffDashboard />} />
             <Route path="puv" element={<PUVPage />} />

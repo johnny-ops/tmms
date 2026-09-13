@@ -64,7 +64,7 @@ function App() {
           <Route path="/verify-otp" element={<OTPVerificationPage />} />
 
           {/* Operator dashboard */}
-          <Route path="/operator" element={<ProtectedRoute><OperatorLayout /></ProtectedRoute>}>
+          <Route path="/operator" element={<ProtectedRoute allowedRoles={['OPERATOR', 'ADMIN']}><OperatorLayout /></ProtectedRoute>}>
             <Route index element={<Navigate to="/operator/dashboard" replace />} />
             <Route path="dashboard" element={<OperatorDashboard />} />
             <Route path="profile" element={<OperatorProfilePage />} />
@@ -78,7 +78,7 @@ function App() {
           </Route>
 
           {/* Driver dashboard */}
-          <Route path="/driver" element={<ProtectedRoute><DriverLayout /></ProtectedRoute>}>
+          <Route path="/driver" element={<ProtectedRoute allowedRoles={['DRIVER', 'ADMIN']}><DriverLayout /></ProtectedRoute>}>
             <Route index element={<Navigate to="/driver/dashboard" replace />} />
             <Route path="dashboard" element={<DriverDashboard />} />
             <Route path="profile" element={<DriverProfilePage />} />

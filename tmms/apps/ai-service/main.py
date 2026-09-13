@@ -59,8 +59,14 @@ def resolve_youtube_stream(yt_url: str, timeout: int = 60) -> Optional[str]:
         "--js-runtimes", f"node:{node_bin}",
         yt_url,
     ]
+    
+    # Strip proxy environment variables to prevent yt-dlp from using invalid proxies
+    env = os.environ.copy()
+    for k in ["http_proxy", "https_proxy", "HTTP_PROXY", "HTTPS_PROXY", "all_proxy", "ALL_PROXY"]:
+        env.pop(k, None)
+
     try:
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, env=env)
         # yt-dlp may exit with code 1 due to warnings even if URL was printed
         stdout = result.stdout.strip()
         lines = [l.strip() for l in stdout.splitlines()
@@ -272,14 +278,15 @@ app.add_middleware(
 CAMERAS: dict[str, dict] = {
     "CAM-001": {
         "id":          "CAM-001",
-        "name":        "Live Traffic — YouTube",
-        "location":    "Live Traffic Camera",
-        "stream_type": "youtube",
-        "stream_url":  "https://www.youtube.com/watch?v=sTF-6_xinUU",
+        "name":        "Local Server Video",
+        "location":    "Server Uploads",
+        "stream_type": CCTV_STREAM_TYPE,  
+        "stream_url":  CCTV_STREAM_URL,   
         "enabled":     True,
         "status":      "OFFLINE",
     }
 }
+
 DEFAULT_VIOLATION_CONFIG = {
     "lines": [
         {

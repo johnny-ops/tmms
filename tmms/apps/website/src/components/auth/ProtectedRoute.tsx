@@ -25,7 +25,20 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
 
   if (allowedRoles && allowedRoles.length > 0) {
     if (!hasPermission(allowedRoles)) {
-      return <Navigate to="/" replace />;
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#f8fafc', padding: 24 }}>
+          <div style={{ background: 'white', padding: '40px', borderRadius: 12, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)', textAlign: 'center', maxWidth: 400 }}>
+            <div style={{ width: 64, height: 64, borderRadius: '50%', background: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
+              <span style={{ fontSize: '2rem' }}>🚫</span>
+            </div>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#0f172a', marginBottom: 8 }}>Access Denied</h2>
+            <p style={{ fontSize: '0.875rem', color: '#64748b', marginBottom: 24 }}>You do not have permission to view this page. This area is restricted to {allowedRoles.join(', ')}s.</p>
+            <a href="/" style={{ display: 'inline-block', background: '#1d4ed8', color: 'white', padding: '10px 20px', borderRadius: 8, textDecoration: 'none', fontWeight: 600 }}>
+              Return to Home
+            </a>
+          </div>
+        </div>
+      );
     }
   }
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, NavLink } from 'react-router-dom';
 import { Sidebar, NavSection } from './Sidebar';
 import { Topbar } from './Topbar';
 import { useAuth } from '@/contexts/AuthContext';
@@ -21,18 +21,14 @@ interface BaseLayoutProps {
 
 function BaseLayout({ navSections, allowedRoles }: BaseLayoutProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, isDemoMode, hasPermission } = useAuth();
 
-  
   if (!user || !hasPermission(allowedRoles)) {
-    
-    
     if (user?.role === 'ADMIN') return <Navigate to="/admin/dashboard" replace />;
     if (user?.role === 'STAFF') return <Navigate to="/staff/dashboard" replace />;
     if (user?.role === 'OPERATOR') return <Navigate to="/operator/dashboard" replace />;
     if (user?.role === 'DRIVER') return <Navigate to="/driver/dashboard" replace />;
-    
-    
     return <Navigate to="/login" replace />;
   }
 
@@ -44,20 +40,23 @@ function BaseLayout({ navSections, allowedRoles }: BaseLayoutProps) {
           fontSize: '0.8125rem', fontWeight: 500, borderBottom: '1px solid #ddd6fe',
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6
         }}>
-          <AlertTriangle size={14} /> DEMO ENVIRONMENT — Data shown is sample data and does not represent real LGU records
+          <AlertTriangle size={14} /> DEMO ENVIRONMENT — Data shown is sample data
         </div>
       )}
 
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-        <Sidebar
-          collapsed={sidebarCollapsed}
-          onToggle={() => setSidebarCollapsed(prev => !prev)}
-          navSections={navSections}
-        />
+        {/* Desktop sidebar — hidden on mobile via CSS */}
+        <div className="desktop-sidebar">
+          <Sidebar
+            collapsed={sidebarCollapsed}
+            onToggle={() => setSidebarCollapsed(prev => !prev)}
+            navSections={navSections}
+          />
+        </div>
 
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: 'var(--bg-body)' }}>
           <Topbar />
-          <main style={{ flex: 1, overflowY: 'auto', padding: '24px 32px' }} className="page-enter">
+          <main style={{ flex: 1, overflowY: 'auto', padding: '20px 16px', paddingBottom: 80 }} className="page-enter">
             <Outlet />
           </main>
         </div>
@@ -214,6 +213,79 @@ const driverNav: NavSection[] = [
   }
 ];
 
+
 export function DriverLayout() {
-  return <BaseLayout navSections={driverNav} allowedRoles={['DRIVER', 'ADMIN']} />;
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const { user, isDemoMode, hasPermission } = useAuth();
+
+  if (!user || !hasPermission(['DRIVER', 'ADMIN'])) {
+    if (user?.role === 'ADMIN') return <Navigate to="/admin/dashboard" replace />;
+    return <Navigate to="/login" replace />;
+  }
+
+  const mobileNavItems = [
+    { to: '/driver/dashboard', icon: <LayoutDashboard size={20} />, label: 'Home' },
+    { to: '/driver/vehicle', icon: <Car size={20} />, label: 'Vehicle' },
+    { to: '/driver/violations', icon: <AlertTriangle size={20} />, label: 'Violations' },
+    { to: '/driver/applications', icon: <ClipboardList size={20} />, label: 'Apply' },
+    { to: '/driver/profile', icon: <Contact size={20} />, label: 'Profile' },
+  ];
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', background: 'var(--bg-body)' }}>
+      {isDemoMode && (
+        <div style={{
+          background: '#f3eeff', color: '#6d28d9', textAlign: 'center', padding: '8px',
+          fontSize: '0.8125rem', fontWeight: 500, borderBottom: '1px solid #ddd6fe',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6
+        }}>
+          <AlertTriangle size={14} /> DEMO ENVIRONMENT
+        </div>
+      )}
+
+      <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+        {/* Desktop sidebar */}
+        <div className="desktop-sidebar">
+          <Sidebar
+            collapsed={sidebarCollapsed}
+            onToggle={() => setSidebarCollapsed(prev => !prev)}
+            navSections={driverNav}
+          />
+        </div>
+
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: 'var(--bg-body)' }}>
+          <Topbar />
+          <main style={{ flex: 1, overflowY: 'auto', padding: '20px 24px' }} className="page-enter">
+            <Outlet />
+          </main>
+        </div>
+      </div>
+
+      {/* ── MOBILE BOTTOM NAV BAR ── */}
+      <nav style={{
+        display: 'none',
+        position: 'fixed', bottom: 0, left: 0, right: 0,
+        background: '#ffffff', borderTop: '1.5px solid #e2e8f0',
+        zIndex: 100,
+        padding: '8px 0 12px',
+        boxShadow: '0 -4px 20px rgba(0,0,0,0.08)',
+      }} className="mobile-bottom-nav">
+        {mobileNavItems.map(item => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            style={({ isActive }) => ({
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
+              flex: 1, padding: '4px 0', textDecoration: 'none',
+              color: isActive ? '#0e1629' : '#94a3b8',
+              transition: 'color 0.15s',
+            })}
+          >
+            {item.icon}
+            <span style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.02em' }}>{item.label}</span>
+          </NavLink>
+        ))}
+      </nav>
+    </div>
+  );
 }

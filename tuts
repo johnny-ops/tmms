@@ -1,0 +1,91 @@
+# 🚦 TMMS Complete System Testing Guide
+
+Welcome to the **Traffic Management & Monitoring System (TMMS)**. This guide will walk you through a complete end-to-end test of the system to ensure all features are working flawlessly, including the recent driver applications, vehicle assignments, and route tracking features.
+
+> [!IMPORTANT]
+> **Prerequisites before testing:**
+> 1. Ensure you have run **all** recent `.sql` migrations in your Supabase SQL Editor, especially `fix_roles.sql` and `migrate_assignment_route.sql`.
+> 2. Ensure your local dev servers are running (AI Service and Website).
+
+---
+
+## 🚗 Phase 1: Driver Registration & Application
+
+First, we will create a new driver and apply to work for an operator.
+
+1. **Register as a Driver**
+   - Go to `http://localhost:5173/register`
+   - Select **DRIVER** as the account type.
+   - Fill in some test details (e.g., Name: *John Doe*, License: `TEST-DRV-001`).
+   - Click Register.
+2. **Verify Empty Dashboard**
+   - You should be immediately redirected to the Driver Dashboard.
+   - Verify that your **Assigned Vehicle** says "None" and you have no active assignments.
+3. **Apply to an Operator**
+   - Go to **My Applications** on the sidebar.
+   - You will see a list of available Operator fleets.
+   - Click **Apply** on one of the operators, type a short message, and submit.
+   - Verify the status shows as **PENDING**.
+4. **Log Out**
+   - Click your profile name in the bottom left corner and log out to prepare for the next phase.
+
+---
+
+## 🏢 Phase 2: Operator Approval & Vehicle Assignment
+
+Next, we'll log in as the Operator, approve the driver's application, and assign them a vehicle.
+
+1. **Log In as Operator**
+   - Log in using the credentials of the Operator you just applied to in Phase 1.
+2. **Approve the Driver**
+   - Go to **Driver Applications**.
+   - You should see the pending application from *John Doe*.
+   - Click to expand it. You can optionally pick a vehicle right away, but for this test, **leave it blank** and click **Accept Driver**.
+3. **Assign a Vehicle**
+   - Go to **Assigned Drivers**.
+   - *John Doe* should now appear in the list with a yellow badge saying "⚠ No vehicle yet".
+   - Click **Assign Vehicle**.
+   - A modal will open listing all your available vehicles. Pick one and click **Select**.
+   - The table should instantly update to show the vehicle plate number and details.
+4. **Log Out**
+   - Log out to return to the Driver's perspective.
+
+---
+
+## 📍 Phase 3: Driver Route Tracking
+
+Now that the driver is approved and has a vehicle, let's test the route tracking system.
+
+1. **Log In as Driver**
+   - Log back in with the Driver account (*John Doe*).
+2. **Verify Vehicle Assignment**
+   - Look at your **Dashboard**. The "Assigned Vehicle" card should now show the plate number you selected. The "Current Assignment" card should show the operator name.
+3. **Set the Active Route**
+   - Click the **"Set your route →"** link on the dashboard (or go to **My Vehicle**).
+   - In the "My Route" section, pick a route from the dropdown (e.g., `RT-001`) and click **Save Route**.
+4. **Check Route Optimization**
+   - Go to **Route Optimization** on the sidebar.
+   - The map should automatically load your selected route's origin and destination and draw the fastest path for you.
+5. **Verify Operator Visibility (Optional)**
+   - If you log back into the Operator account and go to **Assigned Drivers**, the "Current Route" column for *John Doe* will now clearly display the route they just selected in purple.
+
+---
+
+## 🚨 Phase 4: Ticketing & Resolution
+
+To finish the cycle, let's verify that violations correctly link to the vehicle.
+
+1. **Check Violations**
+   - As the Driver, go to **Traffic Violations**. 
+   - If the vehicle you were assigned to has any past tickets, you will see them here immediately. If not, it will show a green "Clean Record!" badge.
+2. **Trigger an AI Violation (Backend Test)**
+   - Open a terminal and use `curl` or Postman to send a POST request to your AI service (usually `http://localhost:8001/api/v1/process-frame`).
+   - Pass in a test payload containing the **exact plate number** of the vehicle assigned to *John Doe*.
+3. **Verify AI Candidate & Admin Approval**
+   - Log into the Supabase Dashboard and check the `ai_violation_candidates` table to see the flagged vehicle.
+   - Log into the website as an Admin (e.g., `admin@govserve.com`), go to **AI Verification**, and approve the ticket.
+4. **Driver Dashboard Warning**
+   - Log back in as the Driver (*John Doe*).
+   - The Dashboard should now show a red warning with **1 Pending Violation**.
+
+**🎉 If all these steps pass, your TMMS system is fully operational end-to-end!**

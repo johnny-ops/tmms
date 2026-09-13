@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Car, FileText, Calendar, Building2, MapPin, Loader2, CheckCircle, ChevronDown } from 'lucide-react';
+import { Car, FileText, Calendar, Building2, MapPin, Loader2, CheckCircle, ChevronDown, Navigation, Clock, Gauge, Trash2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { formatDate, getStatusBadgeClass, formatStatus } from '@/lib/utils';
 
@@ -14,9 +14,14 @@ export function DriverVehiclePage() {
   const [routeSaved, setRouteSaved] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [selectedRouteId, setSelectedRouteId] = useState<string>('');
+  const [savedGpsRoutes, setSavedGpsRoutes] = useState<any[]>([]);
+  const [deletingRouteId, setDeletingRouteId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (user?.id) loadData();
+    if (user?.id) {
+      loadData();
+      loadSavedGpsRoutes();
+    }
   }, [user]);
 
   async function loadData() {
@@ -107,6 +112,50 @@ export function DriverVehiclePage() {
     } finally {
       setSavingRoute(false);
     }
+  }
+
+  async function loadSavedGpsRoutes() {
+    try {
+      // Get driver id first
+      let driverId = user?.driver_id;
+      if (!driverId) {
+        const { data: dr } = await supabase
+          .from('drivers')
+          .select('id')
+          .eq('profile_id', user?.id)
+          .maybeSingle();
+        driverId = dr?.id;
+      }
+      if (!driverId) return;
+
+      const { data } = await supabase
+        .from('driver_saved_routes')
+        .select('*')
+        .eq('driver_id', driverId)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      setSavedGpsRoutes(data || []);
+    } catch (err) {
+      console.error('Failed to load saved GPS routes:', err);
+    }
+  }
+
+  async function deleteGpsRoute(id: string) {
+    setDeletingRouteId(id);
+    try {
+      await supabase.from('driver_saved_routes').delete().eq('id', id);
+      setSavedGpsRoutes(prev => prev.filter(r => r.id !== id));
+    } catch (err) {
+      console.error('Failed to delete route:', err);
+    } finally {
+      setDeletingRouteId(null);
+    }
+  }
+
+  function formatDuration(minutes: number) {
+    if (minutes < 60) return `${Math.round(minutes)} min`;
+    return `${Math.floor(minutes / 60)}h ${Math.round(minutes % 60)}min`;
   }
 
   if (loading) {
@@ -334,6 +383,89 @@ export function DriverVehiclePage() {
                 </span>
               } />
               <InfoRow label="Assigned Since" value={assignment.assigned_at ? formatDate(assignment.assigned_at) : '—'} />
+            </div>
+          </div>
+
+          {/* Saved GPS Routes Card */}
+          <div style={{ background: 'white', borderRadius: 12, border: '1px solid #e2e8f0', overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ width: 36, height: 36, borderRadius: 10, background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Navigation size={18} color="#3b82f6" />
+                </div>
+                <div>
+                  <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.95rem' }}>My Saved GPS Routes</div>
+                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Routes saved from the Route Optimization tool</div>
+                </div>
+              </div>
+              <a
+                href="/driver/routing"
+                style={{ fontSize: '0.78rem', color: '#3b82f6', fontWeight: 600, textDecoration: 'none', background: '#eff6ff', padding: '5px 12px', borderRadius: 6 }}
+              >
+                + Plan New Route
+              </a>
+            </div>
+            <div style={{ padding: '12px 20px 16px' }}>
+              {savedGpsRoutes.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '24px 0', color: '#94a3b8' }}>
+                  <Navigation size={32} style={{ margin: '0 auto 10px', display: 'block', opacity: 0.3 }} />
+                  <div style={{ fontWeight: 600, color: '#64748b', marginBottom: 4 }}>No saved GPS routes yet</div>
+                  <div style={{ fontSize: '0.8rem' }}>Use the Route Optimization tool to plan and save your GPS routes.</div>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {savedGpsRoutes.map((route, i) => (
+                    <div
+                      key={route.id}
+                      style={{
+                        background: i === 0 ? '#eff6ff' : '#f8fafc',
+                        border: `1px solid ${i === 0 ? '#bfdbfe' : '#e2e8f0'}`,
+                        borderRadius: 10,
+                        padding: '12px 14px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: 12
+                      }}
+                    >
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                          {i === 0 && (
+                            <span style={{ fontSize: '0.65rem', fontWeight: 700, background: '#3b82f6', color: 'white', padding: '1px 7px', borderRadius: 10 }}>LATEST</span>
+                          )}
+                          <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1e40af', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {route.start_location.length > 35 ? route.start_location.substring(0, 35) + '...' : route.start_location}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: '0.78rem', color: '#475569', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 6 }}>
+                          → {route.end_location.length > 40 ? route.end_location.substring(0, 40) + '...' : route.end_location}
+                        </div>
+                        <div style={{ display: 'flex', gap: 12 }}>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.75rem', color: '#64748b' }}>
+                            <Gauge size={11} /> {parseFloat(route.distance_km).toFixed(1)} km
+                          </span>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.75rem', color: '#64748b' }}>
+                            <Clock size={11} /> {formatDuration(parseFloat(route.duration_mins))}
+                          </span>
+                          <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
+                            {new Date(route.created_at).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => deleteGpsRoute(route.id)}
+                        disabled={deletingRouteId === route.id}
+                        title="Delete this saved route"
+                        style={{ flexShrink: 0, background: 'none', border: '1px solid #fecaca', borderRadius: 7, padding: '6px 8px', cursor: 'pointer', color: '#ef4444', display: 'flex', alignItems: 'center' }}
+                      >
+                        {deletingRouteId === route.id
+                          ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />
+                          : <Trash2 size={14} />}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>

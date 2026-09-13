@@ -43,43 +43,83 @@ export function OTPVerificationPage() {
       const role = user?.user_metadata?.role ?? searchParams.get('role') ?? 'DRIVER';
 
       // Check if there's pending registration data to complete
-      const pendingRaw = sessionStorage.getItem('tmms_pending_registration');
+      const pendingRaw = localStorage.getItem('tmms_pending_registration');
+      if (!pendingRaw) {
+        console.error('[TMMS] No pending registration found in localStorage!');
+        alert('Warning: Registration data (including license image) was lost. Did you open this link in a different browser or incognito tab?');
+      }
+
       if (pendingRaw && user) {
         const pending = JSON.parse(pendingRaw);
         console.log('[TMMS] Completing registration for role:', pending.role);
 
+        // 1. Upsert Profile (in case trigger already created one with wrong role)
+        const { error: profileErr } = await supabase.rpc('upsert_profile_on_verify', {
+          p_id: user.id,
+          p_role: pending.role,
+          p_email: pending.email,
+          p_full_name: pending.full_name,
+          p_first_name: pending.first_name,
+          p_last_name: pending.last_name,
+          p_middle_name: pending.middle_name || null,
+        });
+        if (profileErr) {
+          // Fallback: try direct upsert if RPC not available
+          await supabase.from('profiles').upsert({
+            id: user.id,
+            role: pending.role,
+            email: pending.email,
+            full_name: pending.full_name,
+            first_name: pending.first_name,
+            last_name: pending.last_name,
+            middle_name: pending.middle_name || null,
+            approval_status: 'PENDING',
+            is_active: true,
+          }, { onConflict: 'id' });
+        }
+
+        // 2. Use the pre-uploaded license image URL if driver
+        const licenseImageUrl: string | null = pending.role === 'DRIVER' ? (pending.license_image_url || null) : null;
+
         if (pending.role === 'DRIVER') {
-          const { error: driverErr } = await supabase.from('drivers').insert({
+          // Use upsert in case a DB trigger already created a partial driver record
+          const { error: driverErr } = await supabase.from('drivers').upsert({
             profile_id: user.id,
             full_name: pending.full_name,
-            license_number: pending.license_number,
-            license_expiry: pending.license_expiry || null,
+            first_name: pending.first_name,
+            last_name: pending.last_name,
+            middle_name: pending.middle_name || null,
+            license_image_url: licenseImageUrl,
             contact_number: pending.contact_number,
             address: pending.address,
-            status: 'ACTIVE',
-          });
-          if (driverErr) console.warn('[TMMS] Driver insert warning:', driverErr.message);
-          else console.log('[TMMS] Driver profile created successfully');
+            status: 'PENDING',
+          }, { onConflict: 'profile_id' });
+          if (driverErr) console.warn('[TMMS] Driver upsert warning:', driverErr.message);
+          else console.log('[TMMS] Driver profile saved successfully, contact:', pending.contact_number);
         } else if (pending.role === 'OPERATOR') {
-          const { error: opErr } = await supabase.from('operators').insert({
+          // Use upsert in case a DB trigger already created a partial operator record
+          const { error: opErr } = await supabase.from('operators').upsert({
             profile_id: user.id,
             full_name: pending.full_name,
+            first_name: pending.first_name,
+            last_name: pending.last_name,
+            middle_name: pending.middle_name || null,
             email: pending.email,
             contact_number: pending.contact_number,
             organization: pending.organization,
             address: pending.address,
-            status: 'ACTIVE',
-          });
-          if (opErr) console.warn('[TMMS] Operator insert warning:', opErr.message);
-          else console.log('[TMMS] Operator profile created successfully');
+            status: 'PENDING',
+          }, { onConflict: 'profile_id' });
+          if (opErr) console.warn('[TMMS] Operator upsert warning:', opErr.message);
+          else console.log('[TMMS] Operator profile saved successfully, contact:', pending.contact_number);
         }
-        sessionStorage.removeItem('tmms_pending_registration');
+        localStorage.removeItem('tmms_pending_registration');
       }
 
+      await supabase.auth.signOut();
+      
       setTimeout(() => {
-        if (role === 'DRIVER') navigate('/driver/dashboard');
-        else if (role === 'OPERATOR') navigate('/operator/dashboard');
-        else navigate('/');
+        window.location.href = '/register?step=success';
       }, 1500);
     } catch (err) {
       console.error('[TMMS] Post-verification error:', err);

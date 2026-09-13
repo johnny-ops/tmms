@@ -55,7 +55,6 @@ export function UsersPage() {
           </h1>
           <p style={{ fontSize: '0.82rem', color: '#64748b' }}>Manage system users and their role assignments</p>
         </div>
-        <button className="btn btn-primary btn-sm"><Plus size={14} /> Add User</button>
       </div>
 
       <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: 8, padding: '14px 16px', marginBottom: 16, display: 'flex', gap: 12 }}>

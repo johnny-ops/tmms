@@ -80,10 +80,9 @@ const adminNav: NavSection[] = [
     title: 'Management',
     items: [
       { to: '/admin/users', icon: <Users size={18} />, label: 'User Management' },
-      { to: '/admin/staff', icon: <Shield size={18} />, label: 'Staff Management' },
       { to: '/admin/operators', icon: <Building2 size={18} />, label: 'Operator Management' },
       { to: '/admin/drivers', icon: <UserCheck size={18} />, label: 'Driver Management' },
-      { to: '/admin/applications', icon: <ClipboardList size={18} />, label: 'Applications' },
+      { to: '/admin/approval', icon: <ClipboardList size={18} />, label: 'Approval' },
     ]
   },
   {
