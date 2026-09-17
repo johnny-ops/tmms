@@ -1617,6 +1617,10 @@ async def analyze_video(file: UploadFile = File(...)):
         "violations":        saved_violations,
         "detections_sample": detections[:50],
     }
+@app.get("/health")
+def health_check():
+    return {"status": "ok", "version": "4.0.0"}
+
 @app.get("/api/cameras/{camera_id}/stream")
 async def mjpeg_stream(camera_id: str):
     session = SESSIONS.get(camera_id)
