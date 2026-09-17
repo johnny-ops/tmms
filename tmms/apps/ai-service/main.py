@@ -99,7 +99,7 @@ OCR_MIN_CONFIDENCE = float(os.environ.get("OCR_MIN_CONFIDENCE", "0.5"))
 CCTV_STREAM_TYPE = os.environ.get("CCTV_STREAM_TYPE", "file")
 _raw_stream_url  = os.environ.get(
     "CCTV_STREAM_URL",
-    str((Path(__file__).parent / "../web/src/assets/sample.mp4").resolve())
+    str((Path(__file__).parent / "test-videos/uploads/sample.mp4").resolve())
 )
 _script_dir = Path(__file__).parent
 if not Path(_raw_stream_url).is_absolute() and not _raw_stream_url.startswith("rtsp") and not _raw_stream_url.startswith("http"):
