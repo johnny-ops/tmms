@@ -12,7 +12,8 @@ export const supabase = createClient(
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: true,
-      flowType: 'pkce' // Use PKCE flow for better security
+      flowType: 'pkce', // Use PKCE flow for better security
+      storageKey: 'tmms-driver-auth'
     }
   }
 );

@@ -15,6 +15,7 @@ export const supabase = createClient(
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: true,
+      storageKey: 'tmms-admin-auth',
     },
     realtime: {
       params: {
