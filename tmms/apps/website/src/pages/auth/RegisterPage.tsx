@@ -53,6 +53,7 @@ export function RegisterPage() {
     organization: '',
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [passwordTouched, setPasswordTouched] = useState(false);
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
   const [error, setError] = useState('');
@@ -560,10 +561,10 @@ export function RegisterPage() {
                 <div>
                   <label style={labelStyle}>Confirm Password *</label>
                   <div style={{ position: 'relative' }}>
-                    <input type="password" style={{ ...inputStyle, paddingRight: 40, cursor: 'text' }} value={formData.confirm_password} onChange={handleConfirmChange} onPaste={handleConfirmPaste} onCopy={e => e.preventDefault()} onCut={e => e.preventDefault()} placeholder="Repeat password" required />
-                    <span style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', color: '#cbd5e1', padding: '0 12px', cursor: 'not-allowed', pointerEvents: 'none' }}>
-                      <EyeOff size={16} />
-                    </span>
+                    <input type={showConfirmPassword ? 'text' : 'password'} style={{ ...inputStyle, paddingRight: 40, cursor: 'text' }} value={formData.confirm_password} onChange={handleConfirmChange} onPaste={handleConfirmPaste} onCopy={e => e.preventDefault()} onCut={e => e.preventDefault()} placeholder="Repeat password" required />
+                    <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', padding: '0 12px' }}>
+                      {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
                   </div>
                   {confirmPasswordError && <div style={{ fontSize: '0.72rem', color: '#dc2626', marginTop: 4 }}>{confirmPasswordError}</div>}
                 </div>
