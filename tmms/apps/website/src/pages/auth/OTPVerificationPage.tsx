@@ -105,7 +105,7 @@ export function OTPVerificationPage() {
     const newDigits = [...digits];
     for (let i = 0; i < 8; i++) newDigits[i] = pasted[i] || '';
     setDigits(newDigits);
-    const lastFilled = Math.min(pasted.length, 5);
+    const lastFilled = Math.min(pasted.length, 7);
     inputRefs.current[lastFilled]?.focus();
   }
 
@@ -286,8 +286,8 @@ export function OTPVerificationPage() {
                       onKeyDown={e => handleKeyDown(i, e)}
                       onPaste={i === 0 ? handlePaste : undefined}
                       style={{
-                        width: 48, height: 54, textAlign: 'center',
-                        fontSize: '1.4rem', fontWeight: 700,
+                        width: 38, height: 46, textAlign: 'center',
+                        fontSize: '1.2rem', fontWeight: 700,
                         border: `2px solid ${digit ? '#1d4ed8' : '#d1d5db'}`,
                         borderRadius: 8, outline: 'none',
                         background: digit ? '#eff6ff' : '#fff',
