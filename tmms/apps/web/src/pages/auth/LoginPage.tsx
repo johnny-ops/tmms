@@ -135,12 +135,12 @@ export function LoginPage() {
               </Link>
             </div>
             <h2 style={{ fontSize: '2rem', fontWeight: 900, color: '#0f172a', marginBottom: 8, letterSpacing: '-0.02em' }}>
-              Sign in
+              Admin Portal
             </h2>
             <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: 24, lineHeight: 1.5 }}>
               {user
                 ? 'You have an active session.'
-                : 'Enter your credentials to access the municipal portal.'}
+                : 'Sign in with your staff or administrator credentials.'}
             </p>
 
             {/* Error */}
@@ -250,13 +250,7 @@ export function LoginPage() {
               </form>
             )}
 
-            {!user && (
-              <div style={{ marginTop: 24, textAlign: 'left' }}>
-                <span style={{ fontSize: '0.8rem', color: '#6b7280' }}>
-                  No account yet? <a href="http://localhost:5174/register" style={{ color: '#152E5E', fontWeight: 700, textDecoration: 'underline' }}>Register</a>
-                </span>
-              </div>
-            )}
+            {/* Registration link removed from Admin portal */}
           </div>
 
         </div>
