@@ -57,7 +57,7 @@ export function Sidebar({ collapsed, onToggle, navSections }: SidebarProps) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, overflow: 'hidden' }}>
           {}
           <img
-            src="/logo.jpg"
+            src="/govserve.png"
             alt="GOVSERVE Logo"
             style={{
               width: collapsed ? 32 : 36,

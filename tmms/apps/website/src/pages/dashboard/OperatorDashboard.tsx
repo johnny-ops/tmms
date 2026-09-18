@@ -102,19 +102,118 @@ export function OperatorDashboard() {
 
   return (
     <div style={{ maxWidth: 1200 }}>
-      {/* Header */}
-      <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
-          Welcome back, {firstName} <span style={{ fontSize: '1.2rem' }}>👋</span>
-        </h1>
-        <p style={{ fontSize: '0.85rem', color: '#64748b' }}>
-          Here's an overview of your fleet and drivers.
-        </p>
+      {/* ── HERO BANNER ── full-width, edge-to-edge */}
+      <div style={{
+        background: 'linear-gradient(160deg, #0f1f5c 0%, #1a3284 55%, #102060 100%)',
+        borderRadius: 0,
+        margin: '-20px -16px 20px -16px',
+        padding: '26px 32px 22px',
+        color: 'white', position: 'relative', overflow: 'hidden',
+        minHeight: 200,
+      }}>
+        {/* Government seal — full height, right side, transparent blend */}
+        <div style={{
+          position: 'absolute', right: -20, top: '50%',
+          transform: 'translateY(-50%)',
+          height: '180%', width: 440, pointerEvents: 'none',
+        }}>
+          <img src="/govserve.png" alt="" style={{
+            width: '100%', height: '100%', objectFit: 'contain',
+            opacity: 0.35,
+          }}
+            onError={(e) => { (e.target as HTMLImageElement).parentElement!.style.display = 'none'; }} />
+        </div>
+
+        {/* Track My Fleet — absolutely top-right */}
+        <button
+          onClick={() => navigate('/operator/vehicles')}
+          style={{
+            position: 'absolute', top: 20, right: 20,
+            padding: '8px 16px', borderRadius: 8, fontSize: '0.8rem', fontWeight: 700,
+            background: 'rgba(255,255,255,0.15)', color: '#fff',
+            border: '1px solid rgba(255,255,255,0.25)', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', gap: 7,
+            backdropFilter: 'blur(8px)', transition: 'all 0.15s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.25)'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.15)'; }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Track My Fleet
+        </button>
+
+        {/* Content — left side */}
+        <div style={{ maxWidth: 580, position: 'relative', zIndex: 2 }}>
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.2)',
+            borderRadius: 20, padding: '4px 12px', marginBottom: 12,
+          }}>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span style={{ fontSize: '0.68rem', fontWeight: 700 }}>
+              Gov Serves Social Services Portal • Operator Portal
+            </span>
+          </div>
+
+          <h1 style={{ fontSize: '2.1rem', fontWeight: 900, marginBottom: 10, color: '#ffffff', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
+            Welcome, {firstName.toUpperCase()}!
+          </h1>
+
+          <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)', marginBottom: 18, lineHeight: 1.65, maxWidth: 460 }}>
+            Manage your fleet of public utility vehicles, monitor driver compliance,
+            and track franchise status — all in one centralized platform.
+          </p>
+
+          <div style={{ position: 'relative', maxWidth: 500, marginBottom: 16 }}>
+            <svg style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', opacity: 0.55 }} width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input
+              type="text"
+              placeholder="Search vehicles, drivers, franchises, violations..."
+              style={{
+                width: '100%', padding: '11px 16px', paddingLeft: 36,
+                borderRadius: 8, border: '1px solid rgba(255,255,255,0.18)',
+                background: 'rgba(0,0,10,0.35)', color: '#fff',
+                fontSize: '0.79rem', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit',
+              }}
+              onFocus={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.45)'; }}
+              onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.18)'; }}
+            />
+          </div>
+
+          <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap', alignItems: 'center' }}>
+            {[
+              { label: 'All Services', active: true, route: '/' },
+              { label: 'My Fleet', active: false, route: '/operator/vehicles' },
+              { label: 'Drivers', active: false, route: '/operator/drivers' },
+              { label: 'Franchises', active: false, route: '/operator/franchises' },
+              { label: 'Violations', active: false, route: '/operator/violations' },
+            ].map((item, i) => (
+              <button key={i}
+                onClick={() => navigate(item.route)}
+                style={{
+                  padding: '5px 14px', borderRadius: 20, fontSize: '0.75rem', fontWeight: 600,
+                  background: item.active ? '#ffffff' : 'transparent',
+                  color: item.active ? '#0f1f5c' : 'rgba(255,255,255,0.85)',
+                  border: item.active ? '1.5px solid #ffffff' : '1px solid rgba(255,255,255,0.3)',
+                  cursor: 'pointer', transition: 'all 0.15s',
+                }}
+                onMouseEnter={e => { if (!item.active) e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
+                onMouseLeave={e => { if (!item.active) e.currentTarget.style.background = 'transparent'; }}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+
+          <div style={{ marginTop: 14, fontSize: '0.58rem', color: 'rgba(255,255,255,0.28)', letterSpacing: '0.18em', textTransform: 'uppercase', fontWeight: 600 }}>
+            Official Government Portal
+          </div>
+        </div>
       </div>
 
       {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))', gap: 14, marginBottom: 28 }}>
-        <StatCard icon={<Car size={22} />}           label="My Vehicles"        value={stats.totalVehicles}     color="#3b82f6" bg="#eff6ff" />
+        <StatCard icon={<Car size={22} />}           label="My Vehicles"        value={stats.totalVehicles}     color="#1a2f6e" bg="#eff6ff" />
         <StatCard icon={<CheckCircle size={22} />}   label="Active Vehicles"    value={stats.activeVehicles}    color="#16a34a" bg="#f0fdf4" />
         <StatCard icon={<FileText size={22} />}      label="Active Franchises"  value={stats.activeFranchises}  color="#7c3aed" bg="#fdf4ff" />
         <StatCard icon={<UserCheck size={22} />}     label="Assigned Drivers"   value={stats.totalDrivers}      color="#d97706" bg="#fffbeb" />

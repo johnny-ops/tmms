@@ -135,79 +135,161 @@ export function DriverDashboard() {
   const driverName = user?.first_name || user?.full_name?.split(',')[1]?.trim() || user?.full_name || 'Driver';
 
   return (
-    <div style={{ maxWidth: 900, margin: '0 auto' }}>
+    <div>
 
-      {/* ── HEADER ── */}
+      {/* ── HERO BANNER ── full-width, edge-to-edge */}
       <div style={{
-        background: 'linear-gradient(135deg, #0e1629 0%, #1e3a5f 100%)',
-        borderRadius: 16, padding: '24px 28px', marginBottom: 20,
+        background: 'linear-gradient(160deg, #0f1f5c 0%, #1a3284 55%, #102060 100%)',
+        borderRadius: 0,
+        margin: '-20px -16px 20px -16px',
+        padding: '26px 32px 22px',
         color: 'white', position: 'relative', overflow: 'hidden',
+        minHeight: 200,
       }}>
+        {/* Government seal — full height, right side, transparent blend */}
         <div style={{
-          position: 'absolute', top: -30, right: -30, width: 160, height: 160,
-          borderRadius: '50%', background: 'rgba(255,255,255,0.04)',
-        }} />
-        <div style={{
-          position: 'absolute', bottom: -20, right: 60, width: 80, height: 80,
-          borderRadius: '50%', background: 'rgba(255,255,255,0.03)',
-        }} />
-        <div style={{ position: 'relative' }}>
-          <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: 4, fontWeight: 500 }}>{greeting},</p>
-          <h1 style={{ fontSize: '1.6rem', fontWeight: 800, marginBottom: 6, color: '#ffffff', letterSpacing: '-0.02em' }}>
-            {driverName} 👋
+          position: 'absolute', right: -20, top: '50%',
+          transform: 'translateY(-50%)',
+          height: '180%', width: 440, pointerEvents: 'none',
+        }}>
+          <img src="/govserve.png" alt="" style={{
+            width: '100%', height: '100%', objectFit: 'contain',
+            opacity: 0.35,
+          }}
+            onError={(e) => { (e.target as HTMLImageElement).parentElement!.style.display = 'none'; }} />
+        </div>
+
+        {/* Track My Applications — absolutely top-right, on top of seal */}
+        <button
+          onClick={() => navigate('/driver/applications')}
+          style={{
+            position: 'absolute', top: 20, right: 20,
+            padding: '8px 16px', borderRadius: 8, fontSize: '0.8rem', fontWeight: 700,
+            background: 'rgba(255,255,255,0.15)', color: '#fff',
+            border: '1px solid rgba(255,255,255,0.25)', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', gap: 7,
+            backdropFilter: 'blur(8px)',
+            transition: 'all 0.15s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.25)'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.15)'; }}
+        >
+          <FileText size={14} /> Track My Applications
+        </button>
+
+        {/* Content — left side */}
+        <div style={{ maxWidth: 580, position: 'relative', zIndex: 2 }}>
+          {/* Top portal label pill */}
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.2)',
+            borderRadius: 20, padding: '4px 12px', marginBottom: 12,
+          }}>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span style={{ fontSize: '0.68rem', fontWeight: 700 }}>
+              Gov Serves Social Services Portal • Help & Service Guide
+            </span>
+          </div>
+
+          {/* Welcome heading */}
+          <h1 style={{ fontSize: '2.1rem', fontWeight: 900, marginBottom: 10, color: '#ffffff', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
+            Welcome, {driverName.toUpperCase()}!
           </h1>
-          <p style={{ fontSize: '0.82rem', color: '#94a3b8', marginBottom: 16 }}>
-            Driver Portal — Here's your overview for today
+
+          {/* Description */}
+          <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)', marginBottom: 18, lineHeight: 1.65, maxWidth: 460 }}>
+            Manage your assigned routes, track vehicle compliance, monitor your violation records, and apply for necessary driver permits or assistance programs efficiently.
           </p>
-          {vehicle && (
-            <div style={{
-              display: 'inline-flex', alignItems: 'center', gap: 8,
-              background: 'rgba(255,255,255,0.1)', borderRadius: 8, padding: '6px 14px',
-              fontSize: '0.8rem', fontWeight: 700, color: '#e2e8f0',
-              border: '1px solid rgba(255,255,255,0.15)',
-            }}>
-              <Car size={14} />
-              {vehicle.plate_number} · {vehicle.make} {vehicle.model}
-            </div>
-          )}
+
+          {/* Search bar */}
+          <div style={{ position: 'relative', maxWidth: 500, marginBottom: 16 }}>
+            <svg style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', opacity: 0.55 }} width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input
+              type="text"
+              placeholder="Search services, requirements, or benefits (e.g. Medical, Senior Booklet, PWD ID, Funer"
+              style={{
+                width: '100%', padding: '11px 16px', paddingLeft: 36,
+                borderRadius: 8, border: '1px solid rgba(255,255,255,0.18)',
+                background: 'rgba(0,0,10,0.35)', color: '#fff',
+                fontSize: '0.79rem', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit',
+              }}
+              onFocus={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.45)'; }}
+              onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.18)'; }}
+            />
+          </div>
+
+          {/* Filter pills */}
+          <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap', alignItems: 'center' }}>
+            {[
+              { label: 'All Services', active: true, route: '/' },
+              { label: 'My Vehicle', active: false, route: '/driver/vehicle' },
+              { label: 'Violations', active: false, route: '/driver/violations' },
+              { label: 'Applications', active: false, route: '/driver/applications' },
+              { label: 'My Route', active: false, route: '/driver/routing' },
+            ].map((item, i) => (
+              <button key={i}
+                onClick={() => navigate(item.route)}
+                style={{
+                  padding: '5px 14px', borderRadius: 20, fontSize: '0.75rem', fontWeight: 600,
+                  background: item.active ? '#ffffff' : 'transparent',
+                  color: item.active ? '#0f1f5c' : 'rgba(255,255,255,0.85)',
+                  border: item.active ? '1.5px solid #ffffff' : '1px solid rgba(255,255,255,0.3)',
+                  cursor: 'pointer', transition: 'all 0.15s',
+                }}
+                onMouseEnter={e => { if (!item.active) e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
+                onMouseLeave={e => { if (!item.active) e.currentTarget.style.background = 'transparent'; }}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
       {/* ── STAT CARDS ── */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))',
-        gap: 12, marginBottom: 20,
-      }}>
-        <StatCard
-          icon={<Car size={22} />}
-          label="Assigned Vehicle"
-          value={loadingAssignment ? '...' : (vehicle ? vehicle.plate_number : 'None')}
-          color="#3a65ae"
-          onClick={() => navigate('/driver/vehicle')}
-        />
-        <StatCard
-          icon={<AlertTriangle size={22} />}
-          label="Active Violations"
-          value={stats.pendingViolations}
-          color="#dc2626"
-          alert={stats.pendingViolations > 0}
-          onClick={() => navigate('/driver/violations')}
-        />
-        <StatCard
-          icon={<ShieldCheck size={22} />}
-          label="Total Violations"
-          value={stats.totalViolations}
-          color="#7c3aed"
-          onClick={() => navigate('/driver/violations')}
-        />
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: 12, marginBottom: 20 }}>
+        <StatCard icon={<Car size={22} />} label="Assigned Vehicle" value={loadingAssignment ? '...' : (vehicle ? vehicle.plate_number : 'None')} color="#1a2f6e" onClick={() => navigate('/driver/vehicle')} />
+        <StatCard icon={<AlertTriangle size={22} />} label="Active Violations" value={stats.pendingViolations} color="#dc2626" alert={stats.pendingViolations > 0} onClick={() => navigate('/driver/violations')} />
+        <StatCard icon={<ShieldCheck size={22} />} label="Total Violations" value={stats.totalViolations} color="#7c3aed" onClick={() => navigate('/driver/violations')} />
+      </div>
+
+      {/* ── HOW IT WORKS ── reference-accurate 4-card grid ── */}
+      <div style={{ marginBottom: 20 }}>
+        <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a', textAlign: 'center', marginBottom: 4 }}>How the Driver Portal Works</h2>
+        <p style={{ fontSize: '0.8rem', color: '#94a3b8', textAlign: 'center', marginBottom: 16 }}>Four simple steps from application filing to official payout and ID releasing.</p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 12 }}>
+          {[
+            { step: '01', icon: <FileText size={20} />, color: '#3b82f6', bg: '#eff6ff', title: 'Select Service & Requirements', desc: 'Choose the service you need (Vehicle, Route, Violations) and prepare the required digital documents.' },
+            { step: '02', icon: <User size={20} />, color: '#8b5cf6', bg: '#f5f3ff', title: 'Fill Online Form & Upload', desc: 'Submit your driver details, license, and upload legible photos or scanned copies of documents.' },
+            { step: '03', icon: <Building2 size={20} />, color: '#10b981', bg: '#ecfdf5', title: 'Operator Assessment', desc: 'Assigned operators review your case, evaluate compliance, and approve or deny your application.' },
+            { step: '04', icon: <CheckCircle2 size={20} />, color: '#f59e0b', bg: '#fffbeb', title: 'Approval & Vehicle Assignment', desc: 'Receive real-time notifications and your official vehicle assignment or compliance certificate.' },
+          ].map((item) => (
+            <div key={item.step} style={{
+              background: '#ffffff', border: '1px solid #f1f5f9',
+              borderRadius: 12, padding: '20px 18px',
+              boxShadow: '0 1px 6px rgba(0,0,0,0.04)',
+              display: 'flex', flexDirection: 'column', gap: 10,
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div style={{ width: 40, height: 40, borderRadius: 10, background: item.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', color: item.color }}>
+                  {item.icon}
+                </div>
+                <span style={{ fontSize: '1.1rem', fontWeight: 900, color: '#e2e8f0' }}>{item.step}</span>
+              </div>
+              <div>
+                <div style={{ fontSize: '0.84rem', fontWeight: 800, color: '#1e293b', marginBottom: 4 }}>{item.title}</div>
+                <div style={{ fontSize: '0.75rem', color: '#64748b', lineHeight: 1.55 }}>{item.desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* ── QUICK ACTIONS ── */}
       <div style={{ marginBottom: 20 }}>
         <h2 style={{ fontSize: '0.78rem', fontWeight: 700, color: '#94a3b8', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 12 }}>Quick Actions</h2>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          <QuickAction icon={<User size={18} />} label="My Profile" onClick={() => navigate('/driver/profile')} color="#3a65ae" />
+          <QuickAction icon={<User size={18} />} label="My Profile" onClick={() => navigate('/driver/profile')} color="#1a2f6e" />
           <QuickAction icon={<FileText size={18} />} label="My License" onClick={() => navigate('/driver/license')} color="#059669" />
           <QuickAction icon={<TrendingUp size={18} />} label="Applications" onClick={() => navigate('/driver/applications')} color="#d97706" />
           <QuickAction icon={<MapPin size={18} />} label="My Route" onClick={() => navigate('/driver/routing')} color="#7c3aed" />

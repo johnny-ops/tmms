@@ -152,7 +152,7 @@ export function StaffDashboard() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           {}
           <img
-            src="/logo.jpg"
+            src="/govserve.png"
             alt="GOVSERVE"
             style={{ width: 52, height: 52, objectFit: 'contain', borderRadius: 8, flexShrink: 0 }}
           />

@@ -1,4 +1,5 @@
-import { useState } from 'react';
+
+import { useState } from 'react';
 import { Settings, Save, AlertCircle, CheckCircle, Bell, Shield, Map } from 'lucide-react';
 
 export function SettingsPage() {

@@ -101,7 +101,7 @@ export default function LandingPage() {
         {/* Brand */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ width: 36, height: 36, borderRadius: '50%', overflow: 'hidden', border: '1.5px solid rgba(255,255,255,0.2)', flexShrink: 0, background: 'rgba(255,255,255,0.05)' }}>
-            <img src="/logo.jpg" alt="TMMS" style={{ width: '100%', height: '100%', objectFit: 'contain' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+            <img src="/govserve.png" alt="TMMS" style={{ width: '100%', height: '100%', objectFit: 'contain' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
           </div>
           <span style={{ fontWeight: 800, fontSize: '1rem', color: '#fff', letterSpacing: '-0.01em' }}>TMMS <span style={{ color: '#f97316', fontWeight: 400, fontSize: '0.75rem' }}>Portal</span></span>
         </div>

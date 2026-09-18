@@ -356,42 +356,49 @@ export function RegisterPage() {
 
   // ── MAIN REGISTRATION UI ───────────────────────────────────────────────────
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#ffffff' }}>
-      
+    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#ffffff', fontFamily: "'Inter', sans-serif" }}>
+
       {/* LEFT PANEL */}
       <div className="auth-left" style={{
-        flex: '0 0 50%',
-        backgroundColor: '#0a1128', // Darker navy blue matching reference
+        flex: '0 0 55%',
+        background: 'linear-gradient(160deg, #0d1f5c 0%, #1a3284 50%, #0d1f5c 100%)',
         position: 'relative',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center', // Center horizontally
-        justifyContent: 'center',
-        padding: '40px',
-        overflow: 'hidden',
-        textAlign: 'center', // Center text
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+        padding: '40px', overflow: 'hidden',
       }}>
+        {/* Background watermark */}
         <div style={{
-          position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-          width: '120%', height: '120%', backgroundImage: 'url(/LGO.jpg)', backgroundSize: 'contain',
-          backgroundPosition: 'center', backgroundRepeat: 'no-repeat', opacity: 0.15, pointerEvents: 'none',
-          filter: 'grayscale(10%) contrast(110%)', mixBlendMode: 'lighten'
+          position: 'absolute', top: '50%', left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '90%', height: '90%',
+          backgroundImage: 'url(/govserve.png)',
+          backgroundSize: 'contain', backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat', opacity: 0.12, pointerEvents: 'none',
         }} />
-        <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#cbd5e1', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 20 }}>
-            GOVSERVE
+        <div style={{ position: 'absolute', top: 20, left: 24, fontSize: '0.6rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+          TRANSPORT MOBILITY MANAGEMENT SYSTEM
+        </div>
+        <div style={{ position: 'relative', zIndex: 10, textAlign: 'center', maxWidth: 500 }}>
+          <div style={{ width: 140, height: 140, borderRadius: '50%', margin: '0 auto 28px', background: 'rgba(255,255,255,0.08)', border: '2px solid rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}>
+            <img src="/govserve.png" alt="Government Seal" style={{ width: 130, height: 130, objectFit: 'contain' }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
           </div>
-          <h1 style={{ fontSize: '3.2rem', fontWeight: 800, color: '#ffffff', lineHeight: 1.1, marginBottom: 24, letterSpacing: '-0.02em', textShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
-            TRANSPORT &amp;<br />MOBILITY SYSTEM
+          <h1 style={{ fontSize: '2.2rem', fontWeight: 900, color: '#ffffff', lineHeight: 1.15, marginBottom: 16, letterSpacing: '-0.02em', textShadow: '0 2px 12px rgba(0,0,0,0.4)' }}>
+            Transport &<br />Mobility Management<br />System
           </h1>
-          <p style={{ fontSize: '0.95rem', color: '#cbd5e1', lineHeight: 1.7, maxWidth: 440, textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
-            A centralized digital platform for efficient transport regulation real-time monitoring and sustainable mobility management for local government units
+          <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.65)', lineHeight: 1.7, maxWidth: 380, margin: '0 auto' }}>
+            A centralized digital platform for efficient transport regulation, real-time monitoring and sustainable mobility management for local government units.
           </p>
+        </div>
+        <div style={{ position: 'absolute', bottom: 24, display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ width: 40, height: 1, background: 'rgba(255,255,255,0.3)' }} />
+          <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.45)', letterSpacing: '0.2em', textTransform: 'uppercase', fontWeight: 600 }}>SERVICE · INTEGRITY · PROGRESS</span>
+          <div style={{ width: 40, height: 1, background: 'rgba(255,255,255,0.3)' }} />
         </div>
       </div>
 
       {/* RIGHT PANEL */}
-      <div className="auth-right" style={{ flex: '0 0 50%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', backgroundColor: '#f8fafc', maxHeight: '100vh', overflowY: 'auto' }}>
+      <div className="auth-right" style={{ flex: '0 0 45%', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '20px', backgroundColor: '#f8fafc', maxHeight: '100vh', overflowY: 'auto' }}>
       
         <div style={{ width: '100%', maxWidth: currentStep === 'details' ? 760 : 500, margin: 'auto', backgroundColor: '#ffffff', borderRadius: 20, boxShadow: '0 10px 40px rgba(0,0,0,0.06)', border: '1px solid #e2e8f0', overflow: 'hidden', transition: 'max-width 0.3s ease' }}>
         

@@ -147,32 +147,44 @@ export function StaffDashboard() {
 
   return (
     <div>
-      {}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          {}
-          <img
-            src="/logo.jpg"
-            alt="GOVSERVE"
-            style={{ width: 52, height: 52, objectFit: 'contain', borderRadius: 8, flexShrink: 0 }}
-          />
-          <div>
-            <h1 style={{ fontSize: '1.3rem', fontWeight: 800, color: '#0f172a', marginBottom: 2, letterSpacing: '-0.02em' }}>
-              GOV<span style={{ color: '#3b82f6' }}>SERVE</span> Dashboard
-            </h1>
-            <p style={{ fontSize: '0.82rem', color: '#64748b' }}>
-              LGU Transport & Mobility Management System — Live Overview
+      {/* ── HERO BANNER (Government Portal Style) ── */}
+      <div style={{
+        background: 'linear-gradient(135deg, #1a2f6e 0%, #2445a7 60%, #1a3a8f 100%)',
+        borderRadius: 16, padding: '28px 32px', marginBottom: 24,
+        color: 'white', position: 'relative', overflow: 'hidden',
+        boxShadow: '0 8px 32px rgba(26,47,110,0.35)',
+      }}>
+        <div style={{ position: 'absolute', top: -40, right: -40, width: 200, height: 200, borderRadius: '50%', background: 'rgba(255,255,255,0.04)' }} />
+        <div style={{ position: 'absolute', bottom: -20, left: '40%', width: 100, height: 100, borderRadius: '50%', background: 'rgba(255,255,255,0.03)' }} />
+
+        <div style={{ position: 'relative', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 20 }}>
+          <div style={{ flex: 1 }}>
+            <p style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', marginBottom: 6, fontWeight: 500 }}>
+              LGU Transport & Mobility Management System — Staff Dashboard
             </p>
+            <h1 style={{ fontSize: '1.75rem', fontWeight: 900, marginBottom: 8, color: '#ffffff', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
+              GOVSERVE Dashboard
+            </h1>
+            <p style={{ fontSize: '0.83rem', color: 'rgba(255,255,255,0.65)', marginBottom: 20, lineHeight: 1.6, maxWidth: 500 }}>
+              Monitor transport operations, manage franchises, track violations, and oversee the entire PUV fleet in real-time.
+            </p>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(34,197,94,0.2)', border: '1px solid rgba(34,197,94,0.3)', borderRadius: 20, padding: '5px 12px', fontSize: '0.75rem', color: '#86efac' }}>
+                <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#22c55e' }} />
+                Live · Updated {lastUpdated.toLocaleTimeString()}
+              </div>
+              <button
+                onClick={() => { refetchAI(); setLastUpdated(new Date()); }}
+                style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 20, padding: '5px 14px', fontSize: '0.75rem', color: 'rgba(255,255,255,0.85)', cursor: 'pointer', fontWeight: 600 }}
+              >
+                <RefreshCw size={11} /> Refresh
+              </button>
+            </div>
           </div>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.75rem', color: '#64748b' }}>
-            <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#22c55e', animation: 'pulse 2s infinite' }} />
-            Live · Updated {lastUpdated.toLocaleTimeString()}
+          <div style={{ flexShrink: 0, opacity: 0.2 }}>
+            <img src="/govserve.png" alt="Seal" style={{ width: 100, height: 100, objectFit: 'contain', filter: 'brightness(0) invert(1)' }}
+              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
           </div>
-          <button className="btn btn-secondary btn-sm" onClick={() => { refetchAI(); setLastUpdated(new Date()); }}>
-            <RefreshCw size={12} /> Refresh
-          </button>
         </div>
       </div>
 
