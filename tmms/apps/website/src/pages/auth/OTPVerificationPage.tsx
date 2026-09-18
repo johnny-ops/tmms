@@ -6,7 +6,7 @@ import { CheckCircle, AlertCircle, ArrowLeft, Mail, RotateCcw } from 'lucide-rea
 export function OTPVerificationPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [digits, setDigits] = useState<string[]>(['', '', '', '', '', '']);
+  const [digits, setDigits] = useState<string[]>(['', '', '', '', '', '', '', '']);
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -101,9 +101,9 @@ export function OTPVerificationPage() {
 
   function handlePaste(e: React.ClipboardEvent<HTMLInputElement>) {
     e.preventDefault();
-    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 8);
     const newDigits = [...digits];
-    for (let i = 0; i < 6; i++) newDigits[i] = pasted[i] || '';
+    for (let i = 0; i < 8; i++) newDigits[i] = pasted[i] || '';
     setDigits(newDigits);
     const lastFilled = Math.min(pasted.length, 5);
     inputRefs.current[lastFilled]?.focus();
@@ -112,7 +112,7 @@ export function OTPVerificationPage() {
   async function handleVerify(e: React.FormEvent) {
     e.preventDefault();
     const token = digits.join('');
-    if (token.length < 6) { setError('Please enter all 6 digits of the verification code.'); return; }
+    if (token.length < 8) { setError('Please enter all 8 digits of the verification code.'); return; }
     if (!email) { setError('Please enter your email address.'); return; }
     setError('');
     setLoading(true);
@@ -228,7 +228,7 @@ export function OTPVerificationPage() {
               Confirm it's you
             </h2>
             <p style={{ fontSize: '0.82rem', color: '#64748b', marginBottom: 20, lineHeight: 1.5 }}>
-              Enter the 6-digit code sent to your email to complete sign-in.
+              Enter the 8-digit code sent to your email to complete sign-in.
             </p>
 
             {/* Email info box */}
@@ -240,7 +240,7 @@ export function OTPVerificationPage() {
               }}>
                 <Mail size={15} color="#1d4ed8" style={{ flexShrink: 0, marginTop: 1 }} />
                 <div>
-                  <p style={{ fontSize: '0.78rem', color: '#1e40af', fontWeight: 600, marginBottom: 2 }}>We sent a 6-digit code to:</p>
+                  <p style={{ fontSize: '0.78rem', color: '#1e40af', fontWeight: 600, marginBottom: 2 }}>We sent an 8-digit code to:</p>
                   <p style={{ fontSize: '0.82rem', color: '#1d4ed8', wordBreak: 'break-all' }}>{email}</p>
                   <p style={{ fontSize: '0.74rem', color: '#64748b', marginTop: 3 }}>It expires in 5 minutes.</p>
                 </div>
@@ -270,7 +270,7 @@ export function OTPVerificationPage() {
                 </div>
               )}
 
-              {/* 6 individual digit boxes */}
+              {/* 8 individual digit boxes */}
               <div style={{ marginBottom: 24 }}>
                 <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#374151', marginBottom: 10 }}>Verification code</label>
                 <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
@@ -307,12 +307,12 @@ export function OTPVerificationPage() {
 
               <button
                 type="submit"
-                disabled={loading || token.length < 6}
+                disabled={loading || token.length < 8}
                 style={{
                   width: '100%', padding: '11px', borderRadius: 8,
-                  background: loading || token.length < 6 ? '#93c5fd' : '#1d4ed8',
+                  background: loading || token.length < 8 ? '#93c5fd' : '#1d4ed8',
                   color: '#ffffff', fontSize: '0.875rem', fontWeight: 700,
-                  border: 'none', cursor: loading || token.length < 6 ? 'not-allowed' : 'pointer',
+                  border: 'none', cursor: loading || token.length < 8 ? 'not-allowed' : 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                 }}
               >

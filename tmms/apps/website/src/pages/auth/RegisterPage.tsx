@@ -241,7 +241,9 @@ export function RegisterPage() {
           setError('This email is already registered. Please log in instead.');
           return;
         }
-        throw signUpError;
+        setError(`Registration failed: ${signUpError.message}`);
+        setLoading(false);
+        return;
       }
 
       const userId = signUpData?.user?.id;
