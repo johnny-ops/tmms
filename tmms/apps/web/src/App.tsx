@@ -5,6 +5,8 @@ import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { AdminLayout, StaffLayout } from './components/layout/RoleLayouts';
 
 import { LoginPage } from './pages/auth/LoginPage';
+import { ForgotPasswordPage } from './pages/auth/ForgotPasswordPage';
+import { ResetPasswordPage } from './pages/auth/ResetPasswordPage';
 
 import { AdminDashboard } from './pages/dashboard/AdminDashboard';
 import { StaffDashboard } from './pages/dashboard/StaffDashboard';
@@ -72,6 +74,8 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/" element={<ProtectedRoute><IndexRedirect /></ProtectedRoute>} />
 
           {/* Admin Routes */}

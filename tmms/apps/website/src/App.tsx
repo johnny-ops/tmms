@@ -8,6 +8,8 @@ import { OperatorLayout, DriverLayout } from "./components/layout/RoleLayouts";
 import { LoginPage } from "./pages/auth/LoginPage";
 import { RegisterPage } from "./pages/auth/RegisterPage";
 import { OTPVerificationPage } from "./pages/auth/OTPVerificationPage";
+import { ForgotPasswordPage } from "./pages/auth/ForgotPasswordPage";
+import { ResetPasswordPage } from "./pages/auth/ResetPasswordPage";
 
 import { OperatorDashboard } from "./pages/dashboard/OperatorDashboard";
 import { DriverDashboard } from "./pages/dashboard/DriverDashboard";
@@ -62,6 +64,8 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/verify-otp" element={<OTPVerificationPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
 
           {/* Operator dashboard */}
           <Route path="/operator" element={<ProtectedRoute allowedRoles={['OPERATOR', 'ADMIN']}><OperatorLayout /></ProtectedRoute>}>
