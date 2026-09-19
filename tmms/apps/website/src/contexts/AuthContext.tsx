@@ -89,7 +89,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const role = normalizeRole(rawRole);
 
       // ── SECURITY: Block inactive/suspended accounts ───────────────────────
-      if (data && data.is_active === false) {
+      const isResettingPassword = window.location.pathname.includes('/reset-password');
+
+      if (data && data.is_active === false && !isResettingPassword) {
         await supabase.auth.signOut();
         setUser(null);
         setLoading(false);
@@ -98,7 +100,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // ── SECURITY: Block accounts pending admin approval ───────────────────
       // Only enforce for DRIVER and OPERATOR roles (staff/admin bypass)
-      if (data && (role === 'DRIVER' || role === 'OPERATOR')) {
+      if (data && (role === 'DRIVER' || role === 'OPERATOR') && !isResettingPassword) {
         const approvalStatus = data.approval_status ?? 'PENDING';
         if (approvalStatus === 'PENDING') {
           await supabase.auth.signOut();
