@@ -34,6 +34,18 @@ import { RouteOptimizationPage } from "./pages/analytics/RouteOptimizationPage";
 
 function IndexRedirect() {
   const { user, loading } = useAuth();
+
+  // ── CRITICAL: Detect Supabase password recovery token in URL hash ──────────
+  // When a user clicks the reset password link in their email, Supabase redirects
+  // them to the root domain with #access_token=...&type=recovery in the hash.
+  // We must intercept this BEFORE showing any other page and send them to /reset-password.
+  if (typeof window !== 'undefined') {
+    const hash = window.location.hash;
+    if (hash && hash.includes('type=recovery')) {
+      return <Navigate to={`/reset-password${hash}`} replace />;
+    }
+  }
+
   if (loading) return <div style={{ display: "flex", minHeight: "100vh", alignItems: "center", justifyContent: "center" }}>Loading...</div>;
   // Show landing page for unauthenticated visitors
   if (!user) return <LandingPage />;

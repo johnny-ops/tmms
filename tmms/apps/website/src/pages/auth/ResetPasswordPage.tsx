@@ -15,10 +15,27 @@ export function ResetPasswordPage() {
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    // Listen for the auth state change that happens when the user clicks the reset link in their email
+    // Parse the access_token and refresh_token from the URL hash
+    // Supabase sends them as: #access_token=...&refresh_token=...&type=recovery
+    const hash = window.location.hash;
+    if (hash && hash.includes('type=recovery')) {
+      const params = new URLSearchParams(hash.substring(1)); // remove leading #
+      const accessToken = params.get('access_token');
+      const refreshToken = params.get('refresh_token');
+      if (accessToken && refreshToken) {
+        // Manually establish the session from the recovery tokens
+        supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })
+          .then(({ error }) => {
+            if (error) {
+              setError('This reset link has expired or already been used. Please request a new one.');
+            }
+          });
+      }
+    }
+
+    // Also listen for the auth state change
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event == "PASSWORD_RECOVERY") {
-        // The user is now logged in with a temporary session, and we can show the reset form
+      if (event === "PASSWORD_RECOVERY") {
         console.log("Password recovery session established");
       }
     });
