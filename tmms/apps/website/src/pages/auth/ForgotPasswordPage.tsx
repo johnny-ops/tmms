@@ -1,10 +1,9 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { AlertCircle, ArrowLeft, ArrowRight, CheckCircle } from 'lucide-react';
 
 export function ForgotPasswordPage() {
-  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -15,16 +14,23 @@ export function ForgotPasswordPage() {
     setError('');
     setLoading(true);
 
-    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
+    try {
+      // Call our custom edge function which sends a branded HTML email via Gmail SMTP
+      const { data, error: fnError } = await supabase.functions.invoke('send-reset-password-email', {
+        body: {
+          email,
+          redirectTo: `${window.location.origin}/reset-password`,
+        },
+      });
 
-    setLoading(false);
+      if (fnError) throw fnError;
+      if (data && !data.success) throw new Error(data.error || 'Failed to send reset email');
 
-    if (resetError) {
-      setError(resetError.message);
-    } else {
       setSuccess(true);
+    } catch (err: any) {
+      setError(err.message || 'Failed to send reset email. Please try again.');
+    } finally {
+      setLoading(false);
     }
   }
 
