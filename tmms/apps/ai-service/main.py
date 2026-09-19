@@ -99,7 +99,7 @@ OCR_MIN_CONFIDENCE = float(os.environ.get("OCR_MIN_CONFIDENCE", "0.5"))
 CCTV_STREAM_TYPE = os.environ.get("CCTV_STREAM_TYPE", "file")
 _raw_stream_url  = os.environ.get(
     "CCTV_STREAM_URL",
-    str((Path(__file__).parent / "test-videos/uploads/sample.mp4").resolve())
+    str((Path(__file__).parent / "test-videos/redlight.mp4").resolve())
 )
 _script_dir = Path(__file__).parent
 if not Path(_raw_stream_url).is_absolute() and not _raw_stream_url.startswith("rtsp") and not _raw_stream_url.startswith("http"):
@@ -266,11 +266,11 @@ if not OCR_ENABLED:
 app = FastAPI(title="GOVCHECK AI Service", version="4.0.0")
 _ALLOWED_ORIGINS = os.environ.get(
     "ALLOWED_ORIGINS",
-    "https://tmms-three.vercel.app,http://localhost:5173,http://localhost:3000",
+    "*",
 ).split(",")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=_ALLOWED_ORIGINS,
+    allow_origins=["*"],
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],

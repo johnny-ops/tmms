@@ -97,3 +97,4 @@ packages/database/
 !apps/ai-service/test-videos/uploads/redlight.mp4
 !apps/ai-service/test-videos/uploads/sample.mp4
 !apps/web/src/assets/sample.mp4
+!apps/ai-service/test-videos/redlight.mp4
