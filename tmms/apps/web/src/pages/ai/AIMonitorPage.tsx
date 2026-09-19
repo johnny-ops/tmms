@@ -1048,7 +1048,7 @@ export function AIMonitorPage() {
                     )}
                     {selectedSource === 'cam1' && (
                       <span style={{ color: '#94a3b8', fontSize: '0.7rem' }}>
-                        Source: Local MP4 • sample.mp4
+                        Source: Local MP4 • redlight.mp4
                       </span>
                     )}
                   </div>
@@ -1170,7 +1170,7 @@ export function AIMonitorPage() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: 10, borderBottom: '1px solid #f1f5f9' }}>
                   <span style={{ fontSize: '0.8rem', color: '#64748b' }}>VIDEO SOURCE</span>
                   <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#3b82f6' }}>
-                    {selectedSource === 'server' ? `● ${activeVideoName}` : selectedSource === 'cam1' ? '● sample.mp4' : selectedSource === 'webcam' ? '● WEBCAM' : '● CUSTOM HLS'}
+                    {selectedSource === 'server' ? `● ${activeVideoName}` : selectedSource === 'cam1' ? '● redlight.mp4' : selectedSource === 'webcam' ? '● WEBCAM' : '● CUSTOM HLS'}
                   </span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: 10, borderBottom: '1px solid #f1f5f9' }}>

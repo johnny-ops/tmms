@@ -225,11 +225,6 @@ export function LoginPage() {
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 32 }}>
-                  <Link to="/forgot-password" style={{ fontSize: '0.75rem', color: '#2563eb', textDecoration: 'underline', fontWeight: 500 }}>
-                    Forgot password?
-                  </Link>
-                </div>
 
                 <button
                   type="submit"

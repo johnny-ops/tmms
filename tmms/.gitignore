@@ -93,3 +93,7 @@ test_db.js
 
 # Exclude database scripts
 packages/database/
+
+!apps/ai-service/test-videos/uploads/redlight.mp4
+!apps/ai-service/test-videos/uploads/sample.mp4
+!apps/web/src/assets/sample.mp4
