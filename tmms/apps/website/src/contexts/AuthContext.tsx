@@ -103,14 +103,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (data && (role === 'DRIVER' || role === 'OPERATOR') && !isResettingPassword) {
         const approvalStatus = data.approval_status ?? 'PENDING';
         if (approvalStatus === 'PENDING') {
-          await supabase.auth.signOut();
-          setUser(null);
-          setLoading(false);
-          // Store reason so login page can display it
-          sessionStorage.setItem('tmms_login_error', 'Your account is pending admin approval. Please wait for an administrator to review your registration.');
-          return;
-        }
-        if (approvalStatus === 'REJECTED') {
+          // Allow login but they will see a pending screen in their layout
+          // Do NOT sign them out - let them access a limited view
+        } else if (approvalStatus === 'FOR_CORRECTION') {
+          // Allow login so they can see the correction reason
+          // Do NOT sign them out
+        } else if (approvalStatus === 'REJECTED') {
           await supabase.auth.signOut();
           setUser(null);
           setLoading(false);

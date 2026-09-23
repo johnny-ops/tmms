@@ -162,6 +162,7 @@ def _load_model_with_fallback() -> YOLO:
     logger.info("🔄 Auto-downloading yolov8s.pt from Ultralytics...")
     m = YOLO("yolov8s.pt")
     dest = script_dir / "models" / "yolov8s.pt"
+    dest.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy("yolov8s.pt", dest)
     logger.info(f"✅ yolov8s.pt downloaded and saved to {dest}")
     return m, "yolov8s.pt"

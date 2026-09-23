@@ -31,6 +31,7 @@ import { DriverApplicationPage } from "./pages/driver/DriverApplicationPage";
 import { NotificationsPage } from "./pages/system/SystemPages";
 import { ParkingAreasPage } from "./pages/parking/ParkingAreasPage";
 import { RouteOptimizationPage } from "./pages/analytics/RouteOptimizationPage";
+import { AnnouncementsPage } from "./pages/announcements/AnnouncementsPage";
 
 function IndexRedirect() {
   const { user, loading } = useAuth();
@@ -91,6 +92,7 @@ function App() {
             <Route path="status" element={<OperatorStatusPage />} />
             <Route path="violations" element={<OperatorViolationsPage />} />
             <Route path="notifications" element={<NotificationsPage />} />
+            <Route path="announcements" element={<AnnouncementsPage />} />
           </Route>
 
           {/* Driver dashboard */}
@@ -105,6 +107,7 @@ function App() {
             <Route path="routing" element={<RouteOptimizationPage />} />
             <Route path="parking" element={<ParkingAreasPage />} />
             <Route path="notifications" element={<NotificationsPage />} />
+            <Route path="announcements" element={<AnnouncementsPage />} />
           </Route>
 
           {/* Fallback */}

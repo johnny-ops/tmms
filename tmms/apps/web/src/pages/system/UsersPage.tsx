@@ -1,9 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Users, Plus, Search, Eye, Edit, Shield, Trash2 } from 'lucide-react';
+import { Users, Plus, Search, Eye, Edit, Shield, Trash2, Lock } from 'lucide-react';
 import { roleLabel, getStatusBadgeClass, formatDate } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/contexts/AuthContext';
+import { SensitiveDataViewer } from '@/components/ui/SensitiveDataViewer';
 
 export function UsersPage() {
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'ADMIN';
+
   const [search, setSearch] = useState('');
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -94,7 +99,9 @@ export function UsersPage() {
                     <span style={{ fontWeight: 500, color: '#1e293b' }}>{u.full_name || 'Unknown'}</span>
                   </div>
                 </td>
-                <td style={{ color: '#64748b' }}>{u.email}</td>
+                <td style={{ color: '#64748b' }}>
+                  <SensitiveDataViewer value={u.email} type="email" />
+                </td>
                 <td>
                   <span style={{
                     background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe',
@@ -114,9 +121,15 @@ export function UsersPage() {
                   <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
                     <button className="btn btn-ghost btn-sm"><Eye size={13} /></button>
                     <button className="btn btn-ghost btn-sm"><Edit size={13} /></button>
-                    <button className="btn btn-ghost btn-sm" style={{ color: '#dc2626' }} onClick={() => handleDeleteUser(u.id, u.full_name)}>
-                      <Trash2 size={13} />
-                    </button>
+                    {isAdmin ? (
+                      <button className="btn btn-ghost btn-sm" style={{ color: '#dc2626' }} onClick={() => handleDeleteUser(u.id, u.full_name)}>
+                        <Trash2 size={13} />
+                      </button>
+                    ) : (
+                      <button className="btn btn-ghost btn-sm" style={{ color: '#cbd5e1', cursor: 'not-allowed' }} title="Admins only">
+                        <Lock size={13} />
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>

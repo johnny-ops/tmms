@@ -40,6 +40,7 @@ import { SettingsPage } from './pages/system/SettingsPage';
 import { NotificationsPage, AuditLogsPage, PlaceholderPage } from './pages/system/SystemPages';
 import { ApprovalPage } from './pages/system/ApprovalPage';
 import { SystemMonitoringPage } from './pages/system/SystemMonitoringPage';
+import { AnnouncementsPage } from './pages/system/AnnouncementsPage';
 
 import { Activity, UserCheck } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
@@ -86,6 +87,8 @@ function App() {
             <Route path="operators" element={<OperatorsPage />} />
             <Route path="drivers" element={<DriversPage />} />
             <Route path="approval" element={<ApprovalPage />} />
+            <Route path="applications" element={<ApprovalPage />} />
+            <Route path="announcements" element={<AnnouncementsPage />} />
             <Route path="monitoring" element={<SystemMonitoringPage />} />
             <Route path="reports" element={<ReportsPage />} />
             <Route path="settings" element={<SettingsPage />} />
@@ -99,6 +102,8 @@ function App() {
             <Route path="franchise" element={<FranchisePage />} />
             <Route path="inspections" element={<InspectionsPage />} />
             <Route path="registrations" element={<RegistrationsPage />} />
+            <Route path="approval" element={<ApprovalPage />} />
+            <Route path="announcements" element={<AnnouncementsPage />} />
             <Route path="violations" element={<ViolationsPage />} />
             <Route path="ai-review" element={<StaffAIReviewPage />} />
             <Route path="ai-monitor" element={<AIMonitorPage />} />

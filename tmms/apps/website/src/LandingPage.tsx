@@ -58,6 +58,8 @@ export default function LandingPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
 
+  const [announcements, setAnnouncements] = useState<any[]>([]);
+
   const [stats, setStats] = useState([
     { value: '...', label: 'Registered Vehicles' },
     { value: '...', label: 'Licensed Drivers' },
@@ -83,7 +85,24 @@ export default function LandingPage() {
         console.error("Failed to fetch stats", err);
       }
     }
+    
+    async function loadAnnouncements() {
+      try {
+        const { data, error } = await supabase
+          .from('announcements')
+          .select('*, route:routes(name)')
+          .eq('status', 'OPEN')
+          .order('created_at', { ascending: false });
+        if (!error && data) {
+          setAnnouncements(data);
+        }
+      } catch (err) {
+        console.error("Failed to load announcements", err);
+      }
+    }
+    
     loadStats();
+    loadAnnouncements();
   }, []);
 
   return (
@@ -273,6 +292,58 @@ export default function LandingPage() {
                 </button>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ══ ANNOUNCEMENTS ══════════════════════════════════════════ */}
+      <section style={{ padding: '80px 40px', background: '#070f26', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: 40 }}>
+            <h2 style={{ fontSize: 'clamp(1.6rem, 3vw, 2.4rem)', fontWeight: 800, color: '#fff' }}>Public Announcements</h2>
+            <p style={{ color: 'rgba(255,255,255,0.6)', marginTop: 8 }}>Available applications and opportunities for Operators and Drivers.</p>
+          </div>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 24 }}>
+            {announcements.length === 0 ? (
+               <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: 40, color: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.02)', borderRadius: 12 }}>
+                 No active announcements at the moment. Please check back later.
+               </div>
+            ) : (
+               announcements.map(a => (
+                 <div key={a.id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: 24, display: 'flex', flexDirection: 'column' }}>
+                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+                     <span style={{ background: 'rgba(22,163,74,0.15)', color: '#4ade80', fontSize: '0.7rem', fontWeight: 700, padding: '4px 10px', borderRadius: 6, border: '1px solid rgba(74,222,128,0.2)' }}>OPEN</span>
+                     <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem' }}>Until {new Date(a.end_date).toLocaleDateString()}</span>
+                   </div>
+                   <h3 style={{ color: '#fff', fontSize: '1.2rem', fontWeight: 700, marginBottom: 8 }}>{a.title}</h3>
+                   <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.9rem', marginBottom: 16 }}>
+                     <div style={{ display: 'flex', gap: 8, marginBottom: 6, alignItems: 'center' }}>
+                       <MapPin size={16} className="text-orange-500" /> <span>{a.route?.name || 'Various Routes'}</span>
+                     </div>
+                     <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                       <Car size={16} className="text-blue-500" /> <span>{a.vehicle_type || 'Various Vehicles'}</span>
+                     </div>
+                   </div>
+                   {a.description && <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem', marginBottom: 20, flex: 1 }}>{a.description}</p>}
+                   
+                   <div style={{ display: 'flex', gap: 12, marginTop: 'auto' }}>
+                     {(a.type === 'OPERATOR' || a.type === 'BOTH') && (
+                       <button onClick={() => navigate(`/register?role=operator&announcement=${a.id}`)} style={{ flex: 1, padding: '10px', background: '#f97316', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 600, cursor: 'pointer', transition: 'opacity 0.2s' }}
+                        onMouseEnter={e => e.currentTarget.style.opacity = '0.9'} onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
+                         Apply as Operator
+                       </button>
+                     )}
+                     {(a.type === 'DRIVER' || a.type === 'BOTH') && (
+                       <button onClick={() => navigate(`/register?role=driver&announcement=${a.id}`)} style={{ flex: 1, padding: '10px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 600, cursor: 'pointer', transition: 'opacity 0.2s' }}
+                         onMouseEnter={e => e.currentTarget.style.opacity = '0.9'} onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
+                         Apply as Driver
+                       </button>
+                     )}
+                   </div>
+                 </div>
+               ))
+            )}
           </div>
         </div>
       </section>

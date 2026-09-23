@@ -44,21 +44,18 @@ function InspectionModal({ vehicleId, vehicles, onClose, onSuccess }: { vehicleI
     try {
       const certNum = isCompleted ? `CERT-${Math.floor(Math.random() * 100000).toString().padStart(5, '0')}` : null;
       
-      const { error } = await supabase.from('inspections').insert({
+      const { error } = await supabase.from('vehicle_inspections').insert({
         vehicle_id: selectedVehicle,
-        scheduled_date: date,
-        inspection_date: isCompleted ? new Date().toISOString().split('T')[0] : null,
-        result: isCompleted ? overall : null,
-        certificate_number: certNum,
+        inspection_date: isCompleted ? date : null,
+        result: isCompleted ? overall : 'PENDING',
         remarks: remarks,
         document_url: documentUrl
       });
 
       if (error) throw error;
       
-      
       if (isCompleted && overall === 'FAILED') {
-          await supabase.from('vehicles').update({ status: 'FOR_INSPECTION' }).eq('id', selectedVehicle);
+          await supabase.from('vehicles').update({ status: 'UNDER_MAINTENANCE' }).eq('id', selectedVehicle);
       } else if (isCompleted && overall === 'PASSED') {
           await supabase.from('vehicles').update({ status: 'ACTIVE' }).eq('id', selectedVehicle);
       }
@@ -100,7 +97,7 @@ function InspectionModal({ vehicleId, vehicles, onClose, onSuccess }: { vehicleI
         <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px' }}>
           
           <div style={{ marginBottom: 20 }}>
-            <label className="form-label">Scheduled Date</label>
+            <label className="form-label">Inspection Date</label>
             <input type="date" className="form-input" value={date} onChange={e => setDate(e.target.value)} />
           </div>
 
@@ -188,7 +185,7 @@ export function InspectionsPage() {
 
   const load = async () => {
     const [iRes, vRes] = await Promise.all([
-      supabase.from('inspections').select('*').order('scheduled_date', { ascending: false }),
+      supabase.from('vehicle_inspections').select('*').order('created_at', { ascending: false }),
       supabase.from('vehicles').select('*'),
     ]);
     setInspectionsList(iRes.data || []);
@@ -204,8 +201,7 @@ export function InspectionsPage() {
   const filtered = inspectionsList.filter(i => {
     const veh = vehicleMap[i.vehicle_id];
     const q = search.toLowerCase();
-    const matchSearch = !q || (veh?.plate_number ?? '').toLowerCase().includes(q) ||
-      (i.certificate_number ?? '').toLowerCase().includes(q);
+    const matchSearch = !q || (veh?.plate_number ?? '').toLowerCase().includes(q);
     const matchResult = !resultFilter || i.result === resultFilter;
     return matchSearch && matchResult;
   });
@@ -234,12 +230,8 @@ export function InspectionsPage() {
             </div>
             <div style={{ padding: '20px' }}>
               <div style={{ marginBottom: 16 }}>
-                <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '0 0 4px 0' }}>Certificate Number</p>
-                <p style={{ fontSize: '0.95rem', fontWeight: 500, margin: 0 }}>{viewingInspection.certificate_number || 'N/A'}</p>
-              </div>
-              <div style={{ marginBottom: 16 }}>
                 <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '0 0 4px 0' }}>Remarks</p>
-                <p style={{ fontSize: '0.9rem', margin: 0 }}>{viewingInspection.remarks || viewingInspection.overall_remarks || 'No remarks provided.'}</p>
+                <p style={{ fontSize: '0.9rem', margin: 0 }}>{viewingInspection.remarks || 'No remarks provided.'}</p>
               </div>
               
               {viewingInspection.document_url && (
@@ -280,7 +272,7 @@ export function InspectionsPage() {
           { label: 'Passed', value: inspectionsList.filter(i => i.result === 'PASSED').length, color: '#22c55e' },
           { label: 'Failed', value: inspectionsList.filter(i => i.result === 'FAILED').length, color: '#ef4444' },
           { label: 'For Reinspection', value: inspectionsList.filter(i => i.result === 'FOR_REINSPECTION').length, color: '#f59e0b' },
-          { label: 'Scheduled', value: inspectionsList.filter(i => !i.result).length, color: '#64748b' },
+          { label: 'Pending', value: inspectionsList.filter(i => i.result === 'PENDING').length, color: '#64748b' },
         ].map(s => (
           <div key={s.label} style={{
             background: 'white', border: '1px solid #e2e8f0', borderRadius: 8,
@@ -300,7 +292,7 @@ export function InspectionsPage() {
         <div style={{ position: 'relative', flex: '1 1 240px' }}>
           <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
           <input className="form-input" style={{ paddingLeft: 32 }}
-            placeholder="Search plate, certificate..."
+            placeholder="Search plate number..."
             value={search} onChange={e => { setSearch(e.target.value); setPage(1); }} />
         </div>
         <select className="form-input" style={{ flex: '0 0 180px' }}
@@ -319,10 +311,9 @@ export function InspectionsPage() {
               <tr>
                 <th>Vehicle</th>
                 <th>Plate</th>
-                <th>Scheduled</th>
+                <th>Created At</th>
                 <th>Inspected</th>
                 <th>Result</th>
-                <th>Certificate</th>
                 <th>Remarks</th>
                 <th style={{ textAlign: 'right' }}>Actions</th>
               </tr>
@@ -343,25 +334,20 @@ export function InspectionsPage() {
                         {veh?.plate_number ?? '—'}
                       </code>
                     </td>
-                    <td style={{ color: '#64748b' }}>{formatDate(i.scheduled_date)}</td>
+                    <td style={{ color: '#64748b' }}>{formatDate(i.created_at)}</td>
                     <td style={{ color: '#64748b' }}>{i.inspection_date ? formatDate(i.inspection_date) : <span style={{ color: '#94a3b8', fontSize: '0.78rem' }}>Pending</span>}</td>
                     <td>
-                      {i.result ? (
-                        <span className={`badge ${getStatusBadgeClass(i.result)}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                          {resultIcon(i.result)} {formatStatus(i.result)}
-                        </span>
-                      ) : <span style={{ color: '#94a3b8', fontSize: '0.78rem' }}>—</span>}
-                    </td>
-                    <td style={{ color: '#64748b', fontSize: '0.78rem' }}>
-                      {i.certificate_number ?? '—'}
+                      <span className={`badge ${getStatusBadgeClass(i.result)}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                        {resultIcon(i.result)} {formatStatus(i.result)}
+                      </span>
                     </td>
                     <td style={{ color: '#64748b', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '0.78rem' }}>
-                      {i.overall_remarks ?? '—'}
+                      {i.remarks ?? '—'}
                     </td>
                     <td>
                       <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
                         <button className="btn btn-ghost btn-sm" title="View" onClick={() => setViewingInspection(i)}><Eye size={13} /></button>
-                        {!i.result && (
+                        {i.result === 'PENDING' && (
                           <button className="btn btn-primary btn-sm" onClick={() => { setInspecting(i.vehicle_id); setShowModal(true); }}>
                             Conduct
                           </button>

@@ -61,6 +61,7 @@ export function OperatorDashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [tickets, setTickets] = useState<any[]>([]);
+  const [announcements, setAnnouncements] = useState<any[]>([]);
 
   const profileFilter = user?.id ? { column: 'profile_id', value: user.id } : undefined;
   const { data: operatorRecords } = useTable<any>('operators', [], profileFilter ? { filter: profileFilter } : undefined);
@@ -84,6 +85,17 @@ export function OperatorDashboard() {
       .order('created_at', { ascending: false })
       .then(({ data }) => setTickets(data ?? []));
   }, [myOperatorId, vehicles.length]);
+
+  // Load latest announcements
+  useEffect(() => {
+    supabase
+      .from('announcements')
+      .select('*')
+      .eq('status', 'OPEN')
+      .order('created_at', { ascending: false })
+      .limit(3)
+      .then(({ data }) => setAnnouncements(data ?? []));
+  }, []);
 
   const getViolationName = (id: string) => {
     const vt = violationTypes.find((v: any) => v.id === id);
@@ -292,46 +304,86 @@ export function OperatorDashboard() {
         </SectionCard>
       </div>
 
-      {/* Recent Violations */}
-      <SectionCard title="Recent Violations" onViewAll={() => navigate('/operator/tickets')}>
-        {tickets.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '36px 20px', color: '#94a3b8' }}>
-            <Shield size={36} style={{ margin: '0 auto 12px', display: 'block', opacity: 0.25 }} />
-            <div style={{ fontWeight: 600, color: '#64748b', marginBottom: 4 }}>No violations on record</div>
-            <div style={{ fontSize: '0.82rem' }}>Your fleet is clean. Keep it up!</div>
-          </div>
-        ) : (
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+        {/* System Announcements */}
+        <SectionCard title="System Announcements" onViewAll={() => navigate('/operator/announcements')}>
           <div style={{ padding: '8px 0' }}>
-            {/* Header row */}
-            <div style={{ display: 'grid', gridTemplateColumns: '120px 110px 1fr 1fr 110px', gap: 8, padding: '8px 20px 10px', borderBottom: '1px solid #f1f5f9' }}>
-              {['Ticket ID', 'Date', 'Plate', 'Violation', 'Status'].map(h => (
-                <div key={h} style={{ fontSize: '0.7rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</div>
-              ))}
-            </div>
-            {tickets.slice(0, 5).map((t, i) => {
-              const matchedVehicle = vehicles.find(v => v.id === t.vehicle_id);
-              return (
-                <div key={t.id} style={{
-                  display: 'grid', gridTemplateColumns: '120px 110px 1fr 1fr 110px',
-                  gap: 8, padding: '11px 20px', alignItems: 'center',
-                  borderBottom: i < Math.min(tickets.length, 5) - 1 ? '1px solid #f8fafc' : 'none',
+            {announcements.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '36px 20px', color: '#94a3b8' }}>
+                <FileText size={36} style={{ margin: '0 auto 12px', display: 'block', opacity: 0.25 }} />
+                <div style={{ fontWeight: 600, color: '#64748b', marginBottom: 4 }}>No recent announcements</div>
+              </div>
+            ) : (
+              announcements.map((ann, i) => (
+                <div key={ann.id} style={{
+                  padding: '12px 20px',
+                  borderBottom: i < announcements.length - 1 ? '1px solid #f8fafc' : 'none',
                   background: i % 2 === 0 ? 'white' : '#fafafa'
                 }}>
-                  <code style={{ fontSize: '0.75rem', color: '#64748b', fontFamily: 'monospace' }}>{t.id.slice(0, 8)}…</code>
-                  <div style={{ fontSize: '0.8rem', color: '#475569' }}>{formatDate(t.created_at)}</div>
-                  <code style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.85rem' }}>
-                    {matchedVehicle ? matchedVehicle.plate_number : '—'}
-                  </code>
-                  <div style={{ fontWeight: 600, color: '#374151', fontSize: '0.82rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {t.violation_type_id ? getViolationName(t.violation_type_id) : '—'}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
+                    <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#0f172a' }}>{ann.title}</div>
+                    <span style={{
+                      fontSize: '0.65rem', fontWeight: 700, padding: '2px 8px', borderRadius: 20,
+                      background: ann.type === 'EMERGENCY' ? '#fef2f2' : '#eff6ff',
+                      color: ann.type === 'EMERGENCY' ? '#dc2626' : '#1d4ed8'
+                    }}>
+                      {ann.type}
+                    </span>
                   </div>
-                  <span className={`badge ${getStatusBadgeClass(t.status)}`} style={{ fontSize: '0.72rem', fontWeight: 700 }}>{formatStatus(t.status)}</span>
+                  <div style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: 8, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                    {ann.description}
+                  </div>
+                  <div style={{ fontSize: '0.7rem', color: '#94a3b8', display: 'flex', gap: 12 }}>
+                    <span>Posted: {formatDate(ann.created_at)}</span>
+                    {ann.start_date && <span>Valid: {ann.start_date} to {ann.end_date}</span>}
+                  </div>
                 </div>
-              );
-            })}
+              ))
+            )}
           </div>
-        )}
-      </SectionCard>
+        </SectionCard>
+
+        {/* Recent Violations */}
+        <SectionCard title="Recent Violations" onViewAll={() => navigate('/operator/tickets')}>
+          {tickets.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '36px 20px', color: '#94a3b8' }}>
+              <Shield size={36} style={{ margin: '0 auto 12px', display: 'block', opacity: 0.25 }} />
+              <div style={{ fontWeight: 600, color: '#64748b', marginBottom: 4 }}>No violations on record</div>
+              <div style={{ fontSize: '0.82rem' }}>Your fleet is clean. Keep it up!</div>
+            </div>
+          ) : (
+            <div style={{ padding: '8px 0' }}>
+              {/* Header row */}
+              <div style={{ display: 'grid', gridTemplateColumns: '120px 110px 1fr 1fr 110px', gap: 8, padding: '8px 20px 10px', borderBottom: '1px solid #f1f5f9' }}>
+                {['Ticket ID', 'Date', 'Plate', 'Violation', 'Status'].map(h => (
+                  <div key={h} style={{ fontSize: '0.7rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</div>
+                ))}
+              </div>
+              {tickets.slice(0, 5).map((t, i) => {
+                const matchedVehicle = vehicles.find(v => v.id === t.vehicle_id);
+                return (
+                  <div key={t.id} style={{
+                    display: 'grid', gridTemplateColumns: '120px 110px 1fr 1fr 110px',
+                    gap: 8, padding: '11px 20px', alignItems: 'center',
+                    borderBottom: i < Math.min(tickets.length, 5) - 1 ? '1px solid #f8fafc' : 'none',
+                    background: i % 2 === 0 ? 'white' : '#fafafa'
+                  }}>
+                    <code style={{ fontSize: '0.75rem', color: '#64748b', fontFamily: 'monospace' }}>{t.id.slice(0, 8)}…</code>
+                    <div style={{ fontSize: '0.8rem', color: '#475569' }}>{formatDate(t.created_at)}</div>
+                    <code style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.85rem' }}>
+                      {matchedVehicle ? matchedVehicle.plate_number : '—'}
+                    </code>
+                    <div style={{ fontWeight: 600, color: '#374151', fontSize: '0.82rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {t.violation_type_id ? getViolationName(t.violation_type_id) : '—'}
+                    </div>
+                    <span className={`badge ${getStatusBadgeClass(t.status)}`} style={{ fontSize: '0.72rem', fontWeight: 700 }}>{formatStatus(t.status)}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </SectionCard>
+      </div>
     </div>
   );
 }

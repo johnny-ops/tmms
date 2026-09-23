@@ -74,6 +74,18 @@ export function DriverDashboard() {
 
   const [assignment, setAssignment] = useState<any>(null);
   const [loadingAssignment, setLoadingAssignment] = useState(true);
+  const [announcements, setAnnouncements] = useState<any[]>([]);
+
+  // Load latest announcements
+  useEffect(() => {
+    supabase
+      .from('announcements')
+      .select('*')
+      .eq('status', 'OPEN')
+      .order('created_at', { ascending: false })
+      .limit(3)
+      .then(({ data }) => setAnnouncements(data ?? []));
+  }, []);
 
   useEffect(() => {
     if (user?.id) loadAssignment();
@@ -387,6 +399,58 @@ export function DriverDashboard() {
               </div>
             )}
           </div>
+        </div>
+
+        {/* System Announcements */}
+        <div style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: 14, overflow: 'hidden', marginBottom: 16 }}>
+          <div style={{ padding: '16px 20px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Bell size={16} color="#f59e0b" /> System Announcements
+            </h3>
+            <button
+              onClick={() => navigate('/driver/announcements')}
+              style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.78rem', fontWeight: 600, color: '#3b82f6', background: '#eff6ff', border: 'none', borderRadius: 8, padding: '5px 12px', cursor: 'pointer' }}
+            >
+              View all <ArrowRight size={12} />
+            </button>
+          </div>
+          {announcements.length === 0 ? (
+            <div style={{ padding: '32px 20px', textAlign: 'center', color: '#94a3b8' }}>
+              <Bell size={32} style={{ display: 'block', margin: '0 auto 10px', opacity: 0.25 }} />
+              <div style={{ fontSize: '0.85rem' }}>No announcements at this time</div>
+            </div>
+          ) : (
+            <div style={{ padding: '8px 0' }}>
+              {announcements.map((ann, i) => (
+                <div key={ann.id} style={{
+                  padding: '12px 20px',
+                  borderBottom: i < announcements.length - 1 ? '1px solid #f8fafc' : 'none',
+                  background: i % 2 === 0 ? 'white' : '#fafafa'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
+                    <div style={{ fontWeight: 700, fontSize: '0.88rem', color: '#0f172a' }}>{ann.title}</div>
+                    <span style={{
+                      fontSize: '0.62rem', fontWeight: 700, padding: '2px 8px', borderRadius: 20,
+                      background: ann.type === 'EMERGENCY' ? '#fef2f2' : ann.type === 'ROUTE_CHANGE' ? '#fff7ed' : '#eff6ff',
+                      color: ann.type === 'EMERGENCY' ? '#dc2626' : ann.type === 'ROUTE_CHANGE' ? '#ea580c' : '#1d4ed8',
+                      whiteSpace: 'nowrap', flexShrink: 0, marginLeft: 8
+                    }}>
+                      {ann.type?.replace('_', ' ')}
+                    </span>
+                  </div>
+                  {ann.description && (
+                    <div style={{ fontSize: '0.78rem', color: '#64748b', marginBottom: 6, lineHeight: 1.5 }}>
+                      {ann.description}
+                    </div>
+                  )}
+                  <div style={{ fontSize: '0.68rem', color: '#94a3b8', display: 'flex', gap: 12 }}>
+                    <span>Posted: {formatDate(ann.created_at)}</span>
+                    {ann.start_date && <span>Valid: {ann.start_date} – {ann.end_date}</span>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Recent Violations */}
