@@ -82,6 +82,65 @@ function ApprovalModal({ franchise, operators, routes, onClose, onApprove, onRej
   );
 }
 
+function RenewalModal({ franchise, onClose, onRenew }: {
+  franchise: any;
+  onClose: () => void;
+  onRenew: (start: string, end: string, notes: string) => Promise<void>;
+}) {
+  const [start, setStart] = useState(franchise.validity_end || new Date().toISOString().split('T')[0]);
+  const [end, setEnd] = useState(() => {
+    const d = new Date(start || new Date());
+    d.setFullYear(d.getFullYear() + 1); // default 1-year renewal
+    return d.toISOString().split('T')[0];
+  });
+  const [notes, setNotes] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    await onRenew(start, end, notes);
+    setSubmitting(false);
+  };
+
+  return (
+    <Modal isOpen={true} onClose={onClose} title="Franchise Renewal Application">
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div style={{ padding: '12px 16px', background: '#f8fafc', borderRadius: 8, border: '1px solid #e2e8f0' }}>
+          <p style={{ fontSize: '0.85rem', color: '#475569', marginBottom: 4 }}>Franchise Number: <strong>{franchise.franchise_number}</strong></p>
+          <p style={{ fontSize: '0.85rem', color: '#475569' }}>Current Expiry: <strong>{franchise.validity_end ? formatDate(franchise.validity_end) : '—'}</strong></p>
+        </div>
+        
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+          <div>
+            <label className="form-label">New Validity Start</label>
+            <input required type="date" className="form-input" value={start} onChange={e => setStart(e.target.value)} />
+          </div>
+          <div>
+            <label className="form-label">New Validity End</label>
+            <input required type="date" className="form-input" value={end} onChange={e => setEnd(e.target.value)} />
+          </div>
+        </div>
+
+        <div>
+          <label className="form-label">Renewal Notes / Remarks</label>
+          <textarea
+            className="form-input" rows={3} placeholder="Optional notes regarding this renewal..."
+            value={notes} onChange={e => setNotes(e.target.value)}
+          />
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 8 }}>
+          <button type="button" className="btn btn-secondary" onClick={onClose} disabled={submitting}>Cancel</button>
+          <button type="submit" className="btn btn-primary" disabled={submitting}>
+            {submitting ? 'Submitting...' : 'Submit Renewal Request'}
+          </button>
+        </div>
+      </form>
+    </Modal>
+  );
+}
+
 export function FranchisePage() {
   const [franchises, setFranchises] = useState<any[]>([]);
   const [operatorsList, setOperatorsList] = useState<any[]>([]);
@@ -93,7 +152,7 @@ export function FranchisePage() {
   const [page, setPage] = useState(1);
   const limit = 10;
   
-  
+  const [renewingId, setRenewingId] = useState<string | null>(null);
   const [reviewingId, setReviewingId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -229,7 +288,25 @@ export function FranchisePage() {
   const totalPages = Math.ceil(total / limit);
   const paginated = filtered.slice((page - 1) * limit, page * limit);
 
+  const handleRenew = async (id: string, start: string, end: string, notes: string) => {
+    try {
+      const { error } = await supabase.from('franchises').update({
+        validity_start: start,
+        validity_end: end,
+        status: 'RENEWAL_PENDING'
+      }).eq('id', id);
+      if (error) throw error;
+      toast.success('Renewal request submitted successfully!');
+      setRenewingId(null);
+      await load();
+    } catch (err: any) {
+      console.error('Renewal action failed:', err);
+      toast.error(`Renewal failed: ${err.message}`);
+    }
+  };
+
   const reviewing = reviewingId ? franchises.find(f => f.id === reviewingId) : null;
+  const renewing = renewingId ? franchises.find(f => f.id === renewingId) : null;
 
   return (
     <div>
@@ -241,6 +318,14 @@ export function FranchisePage() {
           onClose={() => setReviewingId(null)}
           onApprove={() => handleReviewAction(reviewing.id, 'ACTIVE')}
           onReject={() => handleReviewAction(reviewing.id, 'REJECTED')}
+        />
+      )}
+
+      {renewing && (
+        <RenewalModal
+          franchise={renewing}
+          onClose={() => setRenewingId(null)}
+          onRenew={(start, end, notes) => handleRenew(renewing.id, start, end, notes)}
         />
       )}
 
@@ -347,8 +432,8 @@ export function FranchisePage() {
                             Review
                           </button>
                         )}
-                        {(f.status === 'ACTIVE' || f.status === 'EXPIRING') && (
-                          <button className="btn btn-secondary btn-sm" onClick={() => toast.info('Renewal form not implemented yet.')}>
+                        {(f.status === 'ACTIVE' || f.status === 'EXPIRING' || f.status === 'EXPIRED') && (
+                          <button className="btn btn-secondary btn-sm" onClick={() => setRenewingId(f.id)}>
                             Renew
                           </button>
                         )}

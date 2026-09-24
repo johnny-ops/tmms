@@ -89,25 +89,25 @@ const adminNav: NavSection[] = [
   {
     title: 'PUV & Transport',
     items: [
-      { to: '/staff/puv', icon: <Car size={18} />, label: 'PUV Database' },
-      { to: '/staff/franchise', icon: <FileText size={18} />, label: 'Franchise Management' },
-      { to: '/staff/inspections', icon: <ClipboardCheck size={18} />, label: 'Vehicle Inspection' },
+      { to: '/admin/puv', icon: <Car size={18} />, label: 'PUV Database' },
+      { to: '/admin/franchise', icon: <FileText size={18} />, label: 'Franchise Management' },
+      { to: '/admin/inspections', icon: <ClipboardCheck size={18} />, label: 'Vehicle Inspection' },
     ]
   },
   {
     title: 'Traffic & Enforcement',
     items: [
-      { to: '/staff/violations', icon: <Ticket size={18} />, label: 'Traffic Violation' },
-      { to: '/staff/ai-monitor', icon: <Camera size={18} />, label: 'Live AI Monitoring' },
-      { to: '/staff/ai-review', icon: <Eye size={18} />, label: 'AI Detection Review' },
+      { to: '/admin/violations', icon: <Ticket size={18} />, label: 'Traffic Violation' },
+      { to: '/admin/ai-monitor', icon: <Camera size={18} />, label: 'Live AI Monitoring' },
+      { to: '/admin/ai-review', icon: <Eye size={18} />, label: 'AI Detection Review' },
     ]
   },
   {
     title: 'Operations',
     items: [
-      { to: '/staff/parking-terminals', icon: <Map size={18} />, label: 'Parking & Terminals' },
-      { to: '/staff/forecasting', icon: <TrendingUp size={18} />, label: 'Demand Forecasting' },
-      { to: '/staff/routing', icon: <Route size={18} />, label: 'Route Optimization' },
+      { to: '/admin/parking-terminals', icon: <Map size={18} />, label: 'Parking & Terminals' },
+      { to: '/admin/forecasting', icon: <TrendingUp size={18} />, label: 'Demand Forecasting' },
+      { to: '/admin/routing', icon: <Route size={18} />, label: 'Route Optimization' },
     ]
   },
   {

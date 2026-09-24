@@ -92,6 +92,16 @@ function App() {
             <Route path="monitoring" element={<SystemMonitoringPage />} />
             <Route path="reports" element={<ReportsPage />} />
             <Route path="settings" element={<SettingsPage />} />
+            {/* Staff-equivalent pages under admin — keeps Admin in AdminLayout */}
+            <Route path="puv" element={<PUVPage />} />
+            <Route path="franchise" element={<FranchisePage />} />
+            <Route path="inspections" element={<InspectionsPage />} />
+            <Route path="violations" element={<ViolationsPage />} />
+            <Route path="ai-monitor" element={<AIMonitorPage />} />
+            <Route path="ai-review" element={<StaffAIReviewPage />} />
+            <Route path="parking-terminals" element={<ParkingAreasPage />} />
+            <Route path="forecasting" element={<ForecastingPage />} />
+            <Route path="routing" element={<RouteOptimizationPage />} />
           </Route>
 
           {/* Staff Routes */}

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/hooks/useSupabase';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   Megaphone, Plus, Edit2, Trash2, X, AlertCircle, CheckCircle, Clock,
   MapPin, Calendar, Car, Search, Eye, EyeOff

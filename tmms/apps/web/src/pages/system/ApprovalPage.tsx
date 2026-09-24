@@ -5,7 +5,7 @@ import { SensitiveDataViewer } from '@/components/ui/SensitiveDataViewer';
 import {
   CheckCircle, XCircle, Clock, Search, Eye, EyeOff, X, UserCheck,
   Building2, Phone, Mail, FileImage, AlertTriangle, Car, FileText, ClipboardCheck,
-  ShieldAlert, Lock
+  ShieldAlert, Lock, AlertCircle
 } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 
@@ -44,6 +44,7 @@ const STATUS_CONFIG: Record<ApprovalStatus, { label: string; icon: React.ReactNo
   PENDING:  { label: 'Pending',  icon: <Clock size={13} />,       color: '#d97706', bg: '#fffbeb', border: '#fde68a' },
   APPROVED: { label: 'Approved', icon: <CheckCircle size={13} />, color: '#16a34a', bg: '#f0fdf4', border: '#bbf7d0' },
   REJECTED: { label: 'Rejected', icon: <XCircle size={13} />,     color: '#dc2626', bg: '#fef2f2', border: '#fecaca' },
+  FOR_CORRECTION: { label: 'For Correction', icon: <AlertCircle size={13} />, color: '#ea580c', bg: '#fff7ed', border: '#fed7aa' },
 };
 
 function StatusBadge({ status }: { status: ApprovalStatus }) {
